@@ -5,7 +5,7 @@ import { Ticker } from '@/components/Ticker';
 import { DEPARTAMENTOS, DEPTOS, ZONAS, TIPOS, type Departamento } from '@/data/municipios';
 import { FLAGS, ESTADOS_ESTRUCTURALES, type FlagKey, type EstadoEstructural } from '@/data/flags';
 import { compressAndUpload, newUploadId, publicUrl } from '@/lib/photos';
-import { publicarInmueble } from '@/lib/api';
+import { publicarInmueble, importarDomus, type DomusImportSuccess } from '@/lib/api';
 import { inmuebleInputSchema } from '@/lib/schemas';
 import { toast } from '@/lib/toast';
 
@@ -48,6 +48,17 @@ export function PublicarInmueble() {
   const [photos, setPhotos] = useState<PhotoState[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
+  // ── import de Domus ────────────────────────────────────────────────
+  const [domusUrl, setDomusUrl] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [showFallback, setShowFallback] = useState(false);
+  const [fallbackText, setFallbackText] = useState('');
+  const [importedFrom, setImportedFrom] = useState<'domus' | null>(null);
+  const [importSummary, setImportSummary] = useState<string | null>(null);
+  const [importWarnings, setImportWarnings] = useState<string[]>([]);
+  const [declaroAdministro, setDeclaroAdministro] = useState(false);
+
   const municipiosDisponibles = departamento ? DEPTOS[departamento] : null;
   const esInmo = rol === 'inmobiliaria';
 
@@ -84,6 +95,98 @@ export function PublicarInmueble() {
         </div>
       </>
     );
+  }
+
+  function populateFromDomus(resp: DomusImportSuccess): void {
+    const d = resp.data;
+
+    if (d.tipo && (TIPOS as readonly string[]).includes(d.tipo)) setTipo(d.tipo);
+
+    // Municipio → departamento derivado.
+    if (d.municipio) {
+      // Buscar el municipio en nuestro catálogo con match case-insensitive.
+      const target = d.municipio.trim().toLowerCase();
+      let matched: string | null = null;
+      for (const dep of DEPARTAMENTOS) {
+        for (const m of DEPTOS[dep]) {
+          if (m.toLowerCase() === target) {
+            matched = m;
+            setDepartamento(dep);
+            break;
+          }
+        }
+        if (matched) break;
+      }
+      if (matched) setMunicipio(matched);
+    }
+
+    if (d.barrio) setBarrio(d.barrio.trim());
+    if (d.precio > 0) setCanon(String(d.precio));
+    if (d.habitaciones !== null) setHabitaciones(String(d.habitaciones));
+    if (d.banos !== null) setBanos(String(d.banos));
+    if (d.area_m2 !== null) setArea(String(d.area_m2));
+    if (d.descripcion) setNotas(d.descripcion.slice(0, 400));
+    if (d.inmobiliaria.nombre) setQuienNombre(d.inmobiliaria.nombre);
+    if (d.inmobiliaria.telefono_whatsapp) setTelefono(d.inmobiliaria.telefono_whatsapp);
+
+    // Cargar fotos ya subidas al bucket por la edge function.
+    if (resp.fotos.length > 0) {
+      setPhotos(
+        resp.fotos.map((path) => ({
+          path,
+          url: publicUrl(path),
+          uploading: false as const,
+        })),
+      );
+    }
+
+    setImportedFrom('domus');
+    setImportSummary(
+      `Importados ${resp.fotos_subidas}/${resp.fotos_originales} fotos y los datos básicos de la ficha${d.codigo ? ` ${d.codigo}` : ''}.`,
+    );
+    setImportWarnings(resp.warnings);
+  }
+
+  async function runImport(payload: { url?: string; html?: string }): Promise<void> {
+    if (importing) return;
+    setImporting(true);
+    setImportError(null);
+    try {
+      const resp = await importarDomus(payload);
+      if (!resp.ok) {
+        if (resp.reason === 'is_sale') {
+          setImportError(resp.message);
+        } else {
+          setImportError(resp.message || 'No pudimos leer la ficha.');
+          setShowFallback(true);
+        }
+        return;
+      }
+      // Canon alto → pedir confirmación explícita.
+      if (resp.data.precio > 2_500_000) {
+        const ok = window.confirm(
+          `El canon detectado es $${resp.data.precio.toLocaleString('es-CO')} / mes. ` +
+            `Esta plataforma es para familias damnificadas — probablemente no sirve. ` +
+            `¿Continuar de todos modos?`,
+        );
+        if (!ok) {
+          setImporting(false);
+          return;
+        }
+      }
+      populateFromDomus(resp);
+      toast('Ficha importada. Revisá y completá lo pendiente.');
+    } catch (err) {
+      const e = err as Error & { status?: number };
+      if (e.status === 429) {
+        setImportError('Demasiadas imports desde tu red. Esperá una hora.');
+      } else {
+        setImportError(`Error: ${e.message}`);
+        setShowFallback(true);
+      }
+    } finally {
+      setImporting(false);
+    }
   }
 
   function toggleFlag(k: FlagKey, checked: boolean) {
@@ -140,6 +243,10 @@ export function PublicarInmueble() {
 
     if (!estadoEstructural) {
       toast('Elegí una opción del estado estructural del inmueble.', { tone: 'alert' });
+      return;
+    }
+    if (importedFrom === 'domus' && !declaroAdministro) {
+      toast('Marcá la casilla de declaración para publicar la ficha importada.', { tone: 'alert' });
       return;
     }
     if (photos.some((p) => p.uploading)) {
@@ -227,6 +334,90 @@ export function PublicarInmueble() {
           previo al 10 de agosto: subir el precio aprovechando la emergencia es sancionable y
           retiramos el aviso automáticamente si supera en 30% la mediana comparable.
         </div>
+
+        {esInmo && (
+          <div className="border border-line rounded p-[18px] mb-6 bg-surface">
+            <p className="eyebrow">Importar desde Domus</p>
+            <p className="text-[13px] text-muted mb-3">
+              Copiá el enlace público de la ficha en Domus (v2.domus.la) y traemos tipo,
+              barrio, canon, fotos y contacto. Nunca publicamos automáticamente — vos revisás
+              y completás lo que falta.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <input
+                type="url"
+                value={domusUrl}
+                onChange={(e) => setDomusUrl(e.target.value)}
+                placeholder="https://v2.domus.la/file/property/…"
+                className={`${fieldClass} flex-1 min-w-[220px]`}
+                inputMode="url"
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                disabled={importing || !domusUrl.trim()}
+                onClick={() => {
+                  const url = domusUrl.trim();
+                  if (url) void runImport({ url });
+                }}
+                className="font-display font-semibold text-[13px] px-4 py-2 rounded border border-ink bg-ink text-white hover:bg-ink-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {importing ? 'Importando…' : 'Importar ficha'}
+              </button>
+            </div>
+
+            {importError && (
+              <div className="mt-3 border-l-[3px] border-alert bg-alert-soft text-alert p-3 rounded-r text-[13px]">
+                {importError}
+              </div>
+            )}
+
+            {importSummary && (
+              <div className="mt-3 border-l-[3px] border-verify bg-verify-soft text-verify-ink p-3 rounded-r text-[13px]">
+                {importSummary}
+              </div>
+            )}
+
+            {importWarnings.length > 0 && (
+              <ul className="mt-3 flex flex-col gap-2">
+                {importWarnings.map((w, i) => (
+                  <li
+                    key={i}
+                    className="border-l-[3px] border-signal bg-signal-soft text-signal-ink p-3 rounded-r text-[13px]"
+                  >
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {showFallback && (
+              <div className="mt-4 pt-4 border-t border-line-soft">
+                <p className="text-[13px] text-ink-2 mb-2">
+                  Si el enlace no funciona, pegá acá el texto o HTML del aviso y lo intentamos igual.
+                </p>
+                <textarea
+                  value={fallbackText}
+                  onChange={(e) => setFallbackText(e.target.value)}
+                  className={`${fieldClass} font-mono text-[12px]`}
+                  rows={6}
+                  placeholder="Pega acá el texto completo del aviso…"
+                />
+                <button
+                  type="button"
+                  disabled={importing || fallbackText.trim().length < 40}
+                  onClick={() => {
+                    const html = fallbackText.trim();
+                    if (html) void runImport({ html });
+                  }}
+                  className="mt-2 font-display font-semibold text-[13px] px-4 py-2 rounded border border-ink bg-transparent text-ink hover:bg-paper disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Intentar extraer del texto
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <form onSubmit={onSubmit} noValidate>
           {/* ---------- Publicante ---------- */}
@@ -396,13 +587,28 @@ export function PublicarInmueble() {
           </fieldset>
 
           {/* ---------- Estado estructural (obligatorio, tri-estado) ---------- */}
-          <fieldset className="border border-line rounded p-[18px] mb-4 bg-surface">
+          <fieldset
+            className={
+              'border rounded p-[18px] mb-4 bg-surface ' +
+              (importedFrom && !estadoEstructural ? 'border-signal' : 'border-line')
+            }
+          >
             <legend className="font-display font-semibold text-[12.5px] px-2 uppercase tracking-[0.07em]">
               Estado estructural
+              {importedFrom && !estadoEstructural && (
+                <span className="ml-2 font-mono text-[10px] text-signal-ink bg-signal-soft border border-signal-line px-1.5 py-0.5 rounded">
+                  PENDIENTE
+                </span>
+              )}
             </legend>
             <p className="text-[12.5px] text-muted mb-3">
               Obligatorio. Elegí conscientemente: los inmuebles sin revisar salen igual pero con
               advertencia visible a las familias.
+              {importedFrom && (
+                <span className="block mt-1 text-signal-ink">
+                  Domus no envía este dato — lo tenés que marcar vos.
+                </span>
+              )}
             </p>
             <div className="flex flex-col gap-2">
               {ESTADOS_ESTRUCTURALES.map((s) => {
@@ -434,7 +640,18 @@ export function PublicarInmueble() {
           <fieldset className="border border-line rounded p-[18px] mb-4 bg-surface">
             <legend className="font-display font-semibold text-[12.5px] px-2 uppercase tracking-[0.07em]">
               Condiciones
+              {importedFrom && !flags.sinFiador && !flags.sinDeposito && !flags.subsidio && !flags.inmediata && (
+                <span className="ml-2 font-mono text-[10px] text-signal-ink bg-signal-soft border border-signal-line px-1.5 py-0.5 rounded">
+                  REVISÁ
+                </span>
+              )}
             </legend>
+            {importedFrom && (
+              <p className="text-[12.5px] text-signal-ink mb-3">
+                Domus no informa acepta subsidio, exige fiador o depósito ni disponibilidad
+                inmediata. Marcá las que apliquen — la familia decide con esta información.
+              </p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[9px]">
               {FLAGS.map((f) => (
                 <label
@@ -503,6 +720,23 @@ export function PublicarInmueble() {
               </label>
             )}
           </fieldset>
+
+          {importedFrom === 'domus' && (
+            <label className="flex items-start gap-[9px] text-[13px] cursor-pointer border border-signal-line bg-signal-soft rounded p-[10px] mb-4">
+              <input
+                type="checkbox"
+                checked={declaroAdministro}
+                onChange={(e) => setDeclaroAdministro(e.target.checked)}
+                className="mt-[2px] accent-ink flex-none"
+                required
+              />
+              <span>
+                <b>Declaro que administro este inmueble</b> y que la publicación en Hogar
+                Solidario está autorizada por el propietario. Entiendo que los datos vienen
+                importados de Domus y son mi responsabilidad revisarlos.
+              </span>
+            </label>
+          )}
 
           <button
             type="submit"

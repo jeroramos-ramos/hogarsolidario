@@ -1,0 +1,335 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Ficha | Domus, Sistema comercial para inmobiliarias</title>
+		<meta name="author" content=" DOMUS - SOFTWARE COMERCIAL INMOBILIARIO" />
+		<meta property="og:image" content="https://s3.us-west-2.amazonaws.com/pictures.domus.la/inmobiliaria_6/min_5059_1_1785877308.jpg">
+		<meta property="og:site_name" content="www.domus.la">
+		<meta name="description" content="Ofrecemos en venta exclusivo apartamento ubicado en el prestigioso barrio Arboleda, al oeste de Cali, un sector reconocido por su tranquilidad, seguri">
+		<meta property="og:title" content="APARTAMENTO EN VENTA EN arboledas">
+		<meta property="og:description" content="Ofrecemos en venta exclusivo apartamento ubicado en el prestigioso barrio Arboleda, al oeste de Cali, un sector reconocido por su tranquilidad, seguri">
+		
+		<!-- Favicon icon -->
+		<link rel="icon" type="image/png" sizes="16x16" href="https://v2.domus.la/assets/img/icono3.svg">
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link href="https://v2.domus.la/assets/css/styleficha.css?v2" rel="stylesheet">
+        <link href="https://v2.domus.la/assets/css/style.css?v2" rel="stylesheet">
+		<link href="https://v2.domus.la/assets/css/custom.css?v2" rel="stylesheet">
+
+
+		
+    	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+
+		
+    	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css" />
+
+
+	</head>
+	<body>
+		<div id="preloader">
+			<div class="sk-three-bounce">
+				<div class="sk-child sk-bounce1"></div>
+				<div class="sk-child sk-bounce2"></div>
+				<div class="sk-child sk-bounce3"></div>
+			</div>
+		</div>
+<style>
+    .color-perzonalidado {
+        color: #2f2f2f !important;
+    }
+
+    .post,
+    .mini-post {
+        border: solid 1px #2f2f2f    }
+
+    .psv-canvas {
+        width: 100%;
+        height: 400px;
+    }
+</style>
+
+<div id="ficha-navegador">
+    <input type="hidden" id="inmlat" value="3.4485815">
+    <input type="hidden" id="inmlong" value="-76.5481511">
+    <input type="hidden" id="inmfotos" value="[{&quot;id&quot;:175621835,&quot;order&quot;:1,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(2)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_1_1785877308.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_1_1785877308.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:150184,&quot;created_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;},{&quot;id&quot;:175621833,&quot;order&quot;:2,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(1)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_2_1785877308.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_2_1785877308.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:134223,&quot;created_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;},{&quot;id&quot;:175621832,&quot;order&quot;:3,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_3_1785877308.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_3_1785877308.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:152697,&quot;created_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;},{&quot;id&quot;:175621837,&quot;order&quot;:4,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(4)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_4_1785877309.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_4_1785877309.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:136154,&quot;created_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;},{&quot;id&quot;:175621841,&quot;order&quot;:5,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(3)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_5_1785877310.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_5_1785877310.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:168170,&quot;created_at&quot;:&quot;2026-08-04T21:01:51.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:51.000000Z&quot;},{&quot;id&quot;:175621845,&quot;order&quot;:6,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(5)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_6_1785877310.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_6_1785877310.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:231672,&quot;created_at&quot;:&quot;2026-08-04T21:01:51.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:51.000000Z&quot;},{&quot;id&quot;:175621852,&quot;order&quot;:7,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121956_PM&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_7_1785877310.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_7_1785877310.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:131113,&quot;created_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;},{&quot;id&quot;:175621849,&quot;order&quot;:8,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(1)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_8_1785877310.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_8_1785877310.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:113883,&quot;created_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;},{&quot;id&quot;:175621856,&quot;order&quot;:9,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_9_1785877311.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_9_1785877311.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:108912,&quot;created_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;},{&quot;id&quot;:175621861,&quot;order&quot;:10,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(2)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_10_1785877312.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_10_1785877312.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:224544,&quot;created_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;},{&quot;id&quot;:175621857,&quot;order&quot;:11,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121959_PM_(1)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_11_1785877311.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_11_1785877311.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:269702,&quot;created_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;},{&quot;id&quot;:175621860,&quot;order&quot;:12,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121959_PM_(2)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_12_1785877311.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_12_1785877311.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:208274,&quot;created_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;},{&quot;id&quot;:175621872,&quot;order&quot;:13,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121959_PM&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_13_1785877313.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_13_1785877313.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:208816,&quot;created_at&quot;:&quot;2026-08-04T21:01:54.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:54.000000Z&quot;},{&quot;id&quot;:175621871,&quot;order&quot;:14,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(3)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_14_1785877312.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_14_1785877312.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:277907,&quot;created_at&quot;:&quot;2026-08-04T21:01:54.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:54.000000Z&quot;},{&quot;id&quot;:175621865,&quot;order&quot;:15,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(4)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_15_1785877312.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_15_1785877312.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:225408,&quot;created_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;},{&quot;id&quot;:175621867,&quot;order&quot;:16,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(5)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_16_1785877312.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_16_1785877312.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:326178,&quot;created_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;}]">
+    <input type="hidden" id="inmfotos360" value="[]">
+    <input type="hidden" id="inmfotos" value="[{&quot;id&quot;:175621835,&quot;order&quot;:1,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(2)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_1_1785877308.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_1_1785877308.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:150184,&quot;created_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;},{&quot;id&quot;:175621833,&quot;order&quot;:2,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(1)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_2_1785877308.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_2_1785877308.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:134223,&quot;created_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;},{&quot;id&quot;:175621832,&quot;order&quot;:3,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_3_1785877308.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_3_1785877308.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:152697,&quot;created_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;},{&quot;id&quot;:175621837,&quot;order&quot;:4,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(4)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_4_1785877309.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_4_1785877309.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:136154,&quot;created_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:50.000000Z&quot;},{&quot;id&quot;:175621841,&quot;order&quot;:5,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(3)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_5_1785877310.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_5_1785877310.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:168170,&quot;created_at&quot;:&quot;2026-08-04T21:01:51.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:51.000000Z&quot;},{&quot;id&quot;:175621845,&quot;order&quot;:6,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121957_PM_(5)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_6_1785877310.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_6_1785877310.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:231672,&quot;created_at&quot;:&quot;2026-08-04T21:01:51.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:51.000000Z&quot;},{&quot;id&quot;:175621852,&quot;order&quot;:7,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121956_PM&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_7_1785877310.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_7_1785877310.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:131113,&quot;created_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;},{&quot;id&quot;:175621849,&quot;order&quot;:8,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(1)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_8_1785877310.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_8_1785877310.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:113883,&quot;created_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;},{&quot;id&quot;:175621856,&quot;order&quot;:9,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_9_1785877311.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_9_1785877311.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:108912,&quot;created_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;},{&quot;id&quot;:175621861,&quot;order&quot;:10,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(2)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_10_1785877312.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_10_1785877312.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:224544,&quot;created_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;},{&quot;id&quot;:175621857,&quot;order&quot;:11,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121959_PM_(1)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_11_1785877311.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_11_1785877311.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:269702,&quot;created_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:52.000000Z&quot;},{&quot;id&quot;:175621860,&quot;order&quot;:12,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121959_PM_(2)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_12_1785877311.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_12_1785877311.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:208274,&quot;created_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;},{&quot;id&quot;:175621872,&quot;order&quot;:13,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121959_PM&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_13_1785877313.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_13_1785877313.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:208816,&quot;created_at&quot;:&quot;2026-08-04T21:01:54.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:54.000000Z&quot;},{&quot;id&quot;:175621871,&quot;order&quot;:14,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(3)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_14_1785877312.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_14_1785877312.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:277907,&quot;created_at&quot;:&quot;2026-08-04T21:01:54.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:54.000000Z&quot;},{&quot;id&quot;:175621865,&quot;order&quot;:15,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(4)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_15_1785877312.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_15_1785877312.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:225408,&quot;created_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;},{&quot;id&quot;:175621867,&quot;order&quot;:16,&quot;imagename&quot;:&quot;WhatsApp_Image_2026-08-04_at_121958_PM_(5)&quot;,&quot;imageurl&quot;:&quot;https:\/\/pictures.domus.la\/inmobiliaria_6\/5059_16_1785877312.jpg&quot;,&quot;image_wa_url&quot;:null,&quot;thumburl&quot;:&quot;https:\/\/s3.us-west-2.amazonaws.com\/pictures.domus.la\/inmobiliaria_6\/min_5059_16_1785877312.jpg&quot;,&quot;s3bucket&quot;:&quot;pictures.domus.la&quot;,&quot;inmueble&quot;:3763675,&quot;codigo&quot;:5059,&quot;comments&quot;:326178,&quot;created_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-08-04T21:01:53.000000Z&quot;}]">
+    <input type="hidden" id="color" value="#2f2f2f">
+    <input type="hidden" id="video" value="">
+    <input type="hidden" id="mca_ficha" value="0">
+
+
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+        <!-- Header -->
+        <header id="header">
+
+            <h3 class="color-perzonalidado" style="margin: auto">Código: 5059
+                            </h3>
+
+
+        </header>
+
+
+
+
+
+        <!-- Main -->
+        <div id="main">
+                        <article class="post">
+                <header>
+                    <div class="title">
+                        <h3 class="color-perzonalidado">APARTAMENTO EN arboledas</h3>
+                                                                            <h4 class="color-perzonalidado">Venta: $ 1,280,000,000</h4>
+                                                                            <h4 class="color-perzonalidado">Administracion: $ 1,230,000</h4>
+                                                                                                    
+                    </div>
+                </header>
+                <!-- Imagenes  -->
+                <div class="col-xl-12 col-lg-12 col-md-12 col-xxl-12">
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                                                    <iframe v-show="showVideo" width="100%" height="380" :src="video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            <br v-show="showVideo">
+                            <br v-show="showVideo">
+                            <hr v-show="showVideo">
+                            <br v-show="showVideo">
+                        
+                                                    <div role="tabpanel" v-for="(imagen, i) in images" class="tab-pane fade show" :class="(i == 0) ? 'active' : ''" v-bind:id="'imagen_' + imagen.id" v-bind:data-thumb="imagen.thumbail" v-bind:data-src="imagen.src">
+                                <img class="img-fluid alt350 img-domus" :src="(imagen.imageurl)?.replace('https://pictures.domus.la/', 'https://s3.us-west-2.amazonaws.com/pictures.domus.la/')" alt="" :key="i" @click="changeSlide(i)">
+                            </div>
+                        
+
+
+                        <Tinybox :images="imagestinybox" v-model="index" />
+                    </div>
+                    <div class="tab-slide-content new-arrival-product mb-4 mb-xl-0">
+                        <ul class="nav  mt-3" role="tablist">
+                            <li role="presentation" v-for="(imagen, i) in images" :class="(i == 0) ? 'show' : ''">
+                                <a v-bind:href="'#imagen_' + imagen.id" role="tab" data-toggle="tab">
+                                    <img class="img-fluid alt50 mb10" v-bind:src="imagen.thumburl" alt="">
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+                <!-- Fin Imagenes  -->
+
+                <br>
+
+                                    <p>Ofrecemos en venta exclusivo apartamento ubicado en el prestigioso barrio Arboleda, al oeste de Cali, un sector reconocido por su tranquilidad, seguridad y alta valorización. Con 103 m² de diseño moderno y funcional, este inmueble cuenta con una amplia habitación, dos baños, un parqueadero privado y depósito, convirtiéndose en una excelente opción para quienes buscan confort, privacidad y un estilo de vida exclusivo. Su estratégica ubicación permite disfrutar de un entorno residencial con fácil acceso a zonas gastronómicas, centros comerciales, clínicas y principales vías de la ciudad. Valor de venta: $1.280.000.000. Administración: $1.230.000. (MA-028).</p>
+                
+                <div class="row">
+                    <div class="col-md-6"><b>Habitaciones:</b> 1</div>
+                    <div class="col-md-6"><b>Baños:</b> 2</div>
+                    <div class="col-md-6"><b>Área const:</b> 103 m²</div>
+                    <div class="col-md-6"><b>Área lote:</b> 0 m²</div>
+                    <div class="col-md-6"><b>Área priv:</b> 103 m²</div>
+                    <div class="col-md-6"><b>Estrato:</b> 6</div>
+                    <div class="col-md-6"><b>Garajes:</b> 1</div>
+                    <div class="col-md-6"><b>Nivel:</b> 1</div>
+                    <div class="col-md-6"><b>Piso:</b> 0</div>
+                    <div class="col-md-6"><b>Año Construcción:</b> 2017</div>
+                </div>
+
+            </article>
+
+
+            <!-- Post -->
+            <article class="post">
+                <header>
+                    <div class="title">
+                        <h2 class="color-perzonalidado"><i class="fa fa-list"></i> Características</h2>
+                    </div>
+                </header>
+                <ul>
+                    <div class="row">
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Cocina Integral
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Gas natural
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Balcón
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Zona de ropas
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Vista exterior
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Sala-Comedor
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Vestier
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Iluminación natural
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Closet
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Ascensor
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Apto para niños
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> En conjunto cerrado
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Vigilancia privada 24*7
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Zonas Verdes
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Gimnasio
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Piscina
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Portería/Vigilancia
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Colegios/Universidades
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Trans. Público cercano
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Zona Residencial
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Supermercados/C.Ciales
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Área Urbana
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Parques cercanos
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Terrazas
+                            </div>
+                                                    <div class="col-md-6">
+                                <li class="fa fa-check color-perzonalidado"> </li> Cómodas vias de acceso
+                            </div>
+                                            </div>
+                </ul>
+                <br><br>
+
+            </article>
+
+
+            <article class="post">
+                <header>
+                    <div class="title">
+                        
+                        <h2 class="color-perzonalidado"><i class="fa fa-list"></i> Cali ,  arboledas</h2>
+                    </div>
+                </header>
+                <div class="row">
+                    
+                                                    <div id="mapa_detalle" style="border-radius: 10px; margin: 15px; height:300px; width:100% "></div>
+                                                            </div>
+            </article>
+
+
+
+
+            <!-- Post -->
+            
+
+
+            <!-- Post -->
+            
+
+
+
+            <!-- Post -->
+            <article class="post" v-show="showfotos360">
+                <header>
+                    <div class="title">
+                        <h2 class="color-perzonalidado"><i class="fa fa-film"></i>Fotos 360</h2>
+                    </div>
+                </header>
+                <div id="viewer" style="width: 100%; height: 400px;"></div>
+            </article>
+
+            <!-- Post -->
+                                                </div>
+
+
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <!-- Mini Posts -->
+            <section>
+                <div class="mini-posts">
+
+                    <!-- Mini Post -->
+                                            <article class="mini-post">
+                            <header>
+                                <h3 class="color-perzonalidado">Inmobiliaria</h3>
+                                <i class="fa fa-building color-perzonalidado"></i> GARBIRAS INMOBILIARIA<br>
+                                <i class="fa fa-phone color-perzonalidado"></i> 602 5241930,3174144208<br>
+                                <i class="fa fa-map color-perzonalidado"></i> Av. 4N 6N-67 Ofic. 205 Edif. Siglo XXI<br>
+                                <i class="fa fa-globe color-perzonalidado"></i> http://www.garbirasinmobiliaria.com
+                            </header>
+                            <img src="https://pictures.domus.la/inmobiliaria_6/6_logo.png" class="img-fluid m1em">
+                        </article>
+
+                        <!-- Mini Post -->
+                                            
+
+
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <section id="footer">
+                <p><b>Nota:</b> Las características, condiciones, precios, áreas y valores aquí expuestos pueden cambiar sin previo aviso. Las imágenes y otros adjuntos pueden variar de la realidad.</p>
+                <p>Documento generado por <a href="https://domus.la">Domus - Software Comercial Inmobiliario</a></p>
+            </section>
+
+        </div>
+
+
+    </div>
+</div>
+<!-- Scripts -->
+    <script src="https://v2.domus.la/assets/vendor/global/global.min.js"></script>
+    <script src="https://v2.domus.la/assets/js/custom2.min.js?v=1=3"></script>
+    <script src="https://v2.domus.la/assets/js/deznav-init.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://unpkg.com/vue-select@latest"></script>
+    <script src="https://v2.domus.la/assets/js/controllers/templates/header.js"></script>
+
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/uevent@2/browser.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/photo-sphere-viewer@4/dist/photo-sphere-viewer.min.js"></script> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-tinybox"></script>
+
+
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
+
+    <script type="module" src="https://v2.domus.la/assets/js/controllers/components/ficha/ficha.js?v=1.2"></script>
+
+
+
+
+	</body>
+</html>
