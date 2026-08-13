@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AppHeader } from '@/components/AppHeader';
 import { Ticker } from '@/components/Ticker';
 import { Badge } from '@/components/Badge';
+import { ReportDialog } from '@/components/ReportDialog';
 import { useInmueble } from '@/hooks/useInmuebles';
 import { cop, shortId } from '@/lib/format';
+import { publicUrl } from '@/lib/photos';
 import {
   BADGE_ORDEN,
   BADGE_KEY_SET,
@@ -19,6 +22,7 @@ const FLAG_LABEL: Record<FlagKey, string> = Object.fromEntries(
 export function InmuebleDetalle() {
   const { id } = useParams();
   const { data: inm, isLoading, error } = useInmueble(id);
+  const [reportOpen, setReportOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -134,7 +138,7 @@ export function InmuebleDetalle() {
                     className="aspect-[4/3] bg-paper border border-line-soft rounded overflow-hidden"
                   >
                     <img
-                      src={path}
+                      src={publicUrl(path)}
                       alt={`Foto ${i + 1} de ${inm.tipo} en ${inm.barrio}`}
                       loading="lazy"
                       className="w-full h-full object-cover"
@@ -225,9 +229,24 @@ export function InmuebleDetalle() {
               ni pague por "separar" — si le exigen plata antes de mostrarle la vivienda, es
               una estafa.
             </p>
+
+            <button
+              type="button"
+              onClick={() => setReportOpen(true)}
+              className="mt-4 text-[12px] text-muted underline hover:text-alert bg-transparent border-none p-0 cursor-pointer font-body block"
+            >
+              Reportar este aviso
+            </button>
           </aside>
         </div>
       </div>
+
+      <ReportDialog
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        tipoObjeto="inmueble"
+        objetoId={inm.id}
+      />
     </>
   );
 }

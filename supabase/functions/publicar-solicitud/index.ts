@@ -1,8 +1,8 @@
-// Fase 2: scaffold. Fase 4 completa la lógica.
-
 import { corsHeaders, handleOptions, json } from '../_shared/cors.ts';
 import { hashIp } from '../_shared/ip.ts';
 import { checkRateLimit } from '../_shared/ratelimit.ts';
+import { serviceClient } from '../_shared/supabase.ts';
+import { solicitudInputSchema } from '../_shared/schemas.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return handleOptions();
@@ -18,10 +18,43 @@ Deno.serve(async (req) => {
       );
     }
 
-    // TODO (Fase 4): validar zod + insertar en `solicitudes` via service_role.
-    return json({ ok: true, message: 'scaffold' }, { status: 202 });
+    const raw = await req.json().catch(() => null);
+    const parsed = solicitudInputSchema.safeParse(raw);
+    if (!parsed.success) {
+      return json(
+        { error: 'validation_failed', issues: parsed.error.issues },
+        { status: 400 },
+      );
+    }
+    const input = parsed.data;
+
+    const sb = serviceClient();
+    const { data, error } = await sb
+      .from('solicitudes')
+      .insert({
+        nombre: input.nombre,
+        telefono: input.telefono,
+        adultos: input.adultos,
+        ninos: input.ninos,
+        adultos_mayores: input.adultos_mayores,
+        situacion: input.situacion ?? null,
+        en_censo: input.en_censo,
+        departamento: input.departamento,
+        municipio: input.municipio,
+        zona: input.zona ?? null,
+        tipo: input.tipo,
+        habitaciones_min: input.habitaciones_min,
+        tope_canon: input.tope_canon,
+        nota: input.nota ?? null,
+        necesidades: input.necesidades,
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    return json({ id: data.id }, { status: 201 });
   } catch (err) {
     console.error('publicar-solicitud error', err);
-    return json({ error: 'internal' }, { status: 500 });
+    return json({ error: 'internal', message: (err as Error).message }, { status: 500 });
   }
 });

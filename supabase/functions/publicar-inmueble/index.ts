@@ -1,9 +1,12 @@
-// Fase 2: scaffold. La lógica de negocio completa (validación zod + subida de fotos)
-// se implementa en Fase 4. Este handler ya trae CORS, rate-limit y el gateway al service_role.
+// Gateway de publicación: rate-limit, valida payload zod, inserta via service_role.
+// El trigger inmuebles_check_precio marca en_revision automáticamente si el canon
+// supera en 30% la mediana comparable (y hay ≥5 comparables).
 
 import { corsHeaders, handleOptions, json } from '../_shared/cors.ts';
 import { hashIp } from '../_shared/ip.ts';
 import { checkRateLimit } from '../_shared/ratelimit.ts';
+import { serviceClient } from '../_shared/supabase.ts';
+import { inmuebleInputSchema } from '../_shared/schemas.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return handleOptions();
@@ -19,11 +22,59 @@ Deno.serve(async (req) => {
       );
     }
 
-    // TODO (Fase 4): validar payload con zod, insertar en `inmuebles` via service_role,
-    // manejar upload de fotos al bucket, disparar mediana automáticamente por el trigger.
-    return json({ ok: true, message: 'scaffold' }, { status: 202 });
+    const raw = await req.json().catch(() => null);
+    const parsed = inmuebleInputSchema.safeParse(raw);
+    if (!parsed.success) {
+      return json(
+        { error: 'validation_failed', issues: parsed.error.issues },
+        { status: 400 },
+      );
+    }
+    const input = parsed.data;
+
+    const sb = serviceClient();
+    const { data, error } = await sb
+      .from('inmuebles')
+      .insert({
+        publicado_por: input.publicado_por,
+        quien_nombre: input.quien_nombre,
+        quien_doc: input.quien_doc ?? null,
+        telefono: input.telefono,
+        tipo: input.tipo,
+        departamento: input.departamento,
+        municipio: input.municipio,
+        zona: input.zona ?? null,
+        barrio: input.barrio,
+        canon: input.flags.gratuito ? 0 : input.canon,
+        habitaciones: input.habitaciones,
+        banos: input.banos,
+        area_m2: input.area_m2 ?? null,
+        disponible_desde: input.disponible_desde ?? null,
+        duracion_minima: input.duracion_minima ?? null,
+        notas: input.notas ?? null,
+        fotos: input.fotos.map((p) => p),
+        flags: input.flags.gratuito
+          ? { ...input.flags, sinDeposito: true }
+          : input.flags,
+        estado_estructural: input.estado_estructural,
+      })
+      .select('id, estado, motivo_revision')
+      .single();
+
+    if (error) throw error;
+
+    return json(
+      {
+        id: data.id,
+        estado: data.estado,
+        // Si el trigger de precio lo marcó en_revision, se lo devolvemos al publicante
+        // para que sepa por qué no aparece en el buscador.
+        motivo_revision: data.motivo_revision,
+      },
+      { status: 201 },
+    );
   } catch (err) {
     console.error('publicar-inmueble error', err);
-    return json({ error: 'internal' }, { status: 500 });
+    return json({ error: 'internal', message: (err as Error).message }, { status: 500 });
   }
 });
