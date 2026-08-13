@@ -8,17 +8,6 @@ import { useInmueble } from '@/hooks/useInmuebles';
 import { cop, shortId } from '@/lib/format';
 import { publicUrl } from '@/lib/photos';
 import { logContactoInmueble } from '@/lib/api';
-import {
-  BADGE_ORDEN,
-  BADGE_KEY_SET,
-  BADGE_OK_SET,
-  FLAGS,
-  type FlagKey,
-} from '@/data/flags';
-
-const FLAG_LABEL: Record<FlagKey, string> = Object.fromEntries(
-  FLAGS.map((f) => [f.k, f.l]),
-) as Record<FlagKey, string>;
 
 export function InmuebleDetalle() {
   const { id } = useParams();
@@ -73,7 +62,6 @@ export function InmuebleDetalle() {
     );
   }
 
-  const badges = BADGE_ORDEN.filter((k) => inm.flags[k]);
   const necesitaRevisar = inm.estado_estructural === 'sin_revisar';
   const propietarioSinVerificar = inm.publicado_por === 'propietario';
 
@@ -123,11 +111,9 @@ export function InmuebleDetalle() {
           </div>
         )}
 
-        {inm.estado_estructural === 'revisado_ingenieria' && (
-          <div className="mt-5 bg-verify-soft border-l-[3px] border-verify p-[13px] pl-4 rounded-r text-[13px] text-verify-ink">
-            <b>✓ Revisado por ingeniería / gestión del riesgo.</b>
-          </div>
-        )}
+        {/* La confirmación positiva "revisado por ingeniería" se oculta en la vista
+            pública mientras el inventario está en formación. La advertencia sin_revisar
+            de arriba sí se muestra: una familia tiene derecho a saber si NO se revisó. */}
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-[1fr_320px] gap-6 items-start">
           <div>
@@ -157,22 +143,9 @@ export function InmuebleDetalle() {
               <p className="mt-5 text-[14px] text-ink-2 leading-relaxed">{inm.notas}</p>
             )}
 
-            {badges.length > 0 && (
-              <div className="mt-5 flex flex-wrap gap-[6px]">
-                {badges.map((k) => {
-                  const tone: 'key' | 'ok' | 'neutral' = BADGE_KEY_SET.has(k)
-                    ? 'key'
-                    : BADGE_OK_SET.has(k)
-                      ? 'ok'
-                      : 'neutral';
-                  return (
-                    <Badge key={k} tone={tone}>
-                      {FLAG_LABEL[k]}
-                    </Badge>
-                  );
-                })}
-              </div>
-            )}
+            {/* Sellos positivos (sin fiador, subsidio, amoblado, etc.) ocultos por
+                decisión de producto — se siguen guardando en la base para reactivarlos
+                sin editar avisos. */}
           </div>
 
           <aside className="bg-surface border border-line rounded p-5 md:sticky md:top-[14px]">

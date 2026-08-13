@@ -4,39 +4,22 @@ import { cop, shortId } from '@/lib/format';
 import { publicUrl } from '@/lib/photos';
 import { logContactoInmueble } from '@/lib/api';
 import { Badge } from './Badge';
-import { FLAGS, type FlagKey } from '@/data/flags';
+import { PlaceholderPhoto } from './PlaceholderPhoto';
 
-const FLAG_LABEL: Record<FlagKey, string> = Object.fromEntries(
-  FLAGS.map((f) => [f.k, f.l]),
-) as Record<FlagKey, string>;
-
-// Los que quitan barreras — leen ámbar y van primero.
-const BARRIER_KEYS: readonly FlagKey[] = ['gratuito', 'sinFiador', 'sinDeposito', 'subsidio'];
-
-function PlaceholderPhoto() {
-  // Ícono neutro: casa de línea sobre paper. Reemplaza el hueco cuando no hay foto.
-  return (
-    <div className="w-full h-full flex items-center justify-center text-line" aria-hidden="true">
-      <svg width="40%" height="40%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-        <path d="M3 10.5 12 3l9 7.5V21H3V10.5Z" />
-        <path d="M9 21v-6h6v6" />
-      </svg>
-    </div>
-  );
-}
+// Los sellos positivos (sin fiador, subsidio, amoblado, revisado, etc.) no se
+// muestran en la vista pública mientras el inventario está en formación.
+// Se mantienen guardados en la base para poder reactivarlos sin editar avisos.
+// Excepciones que sí quedan: la advertencia "sin revisar tras el sismo" y el
+// disclosure "publicante sin verificar" — información de seguridad, no sellos.
 
 export function InmuebleCard({ inm }: { inm: InmueblePublico }) {
-  const barrierChips = BARRIER_KEYS.filter((k) => inm.flags[k]);
   const necesitaRevisar = inm.estado_estructural === 'sin_revisar';
   const propietarioSinVerificar = inm.publicado_por === 'propietario';
   const foto = inm.fotos[0];
 
-  const metaTags = [
-    inm.tipo,
-    inm.municipio,
-    inm.zona,
-    inm.flags.amoblado ? 'Amoblado' : 'Sin amoblar',
-  ].filter((x): x is string => Boolean(x));
+  const metaTags = [inm.tipo, inm.municipio, inm.zona].filter(
+    (x): x is string => Boolean(x),
+  );
 
   const waUrl = `https://wa.me/57${inm.telefono}?text=${encodeURIComponent(
     `Hola, escribo por el inmueble ${shortId(inm.id)} de hogarsolidario.co (${inm.tipo} en ${inm.barrio}, ${inm.municipio}). ¿Sigue disponible?`,
@@ -97,16 +80,14 @@ export function InmuebleCard({ inm }: { inm: InmueblePublico }) {
             <p className="text-[13px] text-muted line-clamp-1 m-0">{inm.notas}</p>
           ) : null}
 
-          {/* Barrier chips en ámbar — primero después del precio. Diferencial. */}
-          {(barrierChips.length > 0 || necesitaRevisar || propietarioSinVerificar) && (
+          {/* Solo se muestran señales de seguridad — sellos positivos están ocultos
+              en la vista pública hasta que el inventario tenga suficiente masa. */}
+          {(necesitaRevisar || propietarioSinVerificar) && (
             <div className="flex flex-wrap gap-1">
-              {barrierChips.map((k) => (
-                <Badge key={k} tone="key">
-                  {FLAG_LABEL[k]}
-                </Badge>
-              ))}
-              {necesitaRevisar && <Badge tone="warn">Sin revisar</Badge>}
-              {propietarioSinVerificar && <Badge tone="neutral">Sin verificar</Badge>}
+              {necesitaRevisar && <Badge tone="warn">Sin revisar tras el sismo</Badge>}
+              {propietarioSinVerificar && (
+                <Badge tone="neutral">Publicante sin verificar</Badge>
+              )}
             </div>
           )}
 

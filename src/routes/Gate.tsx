@@ -1,9 +1,10 @@
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Building2, Home, HandHeart, type LucideIcon } from 'lucide-react';
 import { Ticker } from '@/components/Ticker';
 import { Hero } from '@/components/Hero';
-import { StatsBanner } from '@/components/StatsBanner';
-import { useStats } from '@/hooks/useStats';
+import { InmueblePreviewCard } from '@/components/InmueblePreviewCard';
+import { useInmuebles } from '@/hooks/useInmuebles';
 
 type RoleKey = 'inmobiliaria' | 'propietario' | 'afectado';
 
@@ -49,12 +50,20 @@ const ROLES: RoleCard[] = [
 
 export function Gate() {
   const navigate = useNavigate();
-  const { data: stats } = useStats();
+  const { data: inmuebles = [], isLoading: loadingInmuebles } = useInmuebles();
+
+  // Top 6 por canon ascendente. Familias que llegan por WhatsApp ven
+  // vivienda real de una, sin tener que elegir rol.
+  const preview = useMemo(() => {
+    const sorted = [...inmuebles].sort((a, b) => a.canon - b.canon);
+    return sorted.slice(0, 6);
+  }, [inmuebles]);
+  const totalAvisos = inmuebles.length;
 
   return (
     <>
       <Hero />
-      <Ticker inmuebles={stats?.total ?? 0} familias={0} />
+      <Ticker inmuebles={totalAvisos} familias={0} />
 
       <section className="wrap pt-8 pb-20">
         <p className="text-base text-ink-2 max-w-[60ch]">
@@ -62,8 +71,6 @@ export function Gate() {
           y propietarios del Valle, el Eje Cafetero y el Chocó que están abriendo sus inmuebles.
           Buscar es gratis y no pedimos documentos.
         </p>
-
-        <StatsBanner />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[14px] mt-8">
           {ROLES.map((r) => {
@@ -101,6 +108,50 @@ export function Gate() {
             );
           })}
         </div>
+
+        {/* ─── Catálogo preview: familias que llegan por WhatsApp ven vivienda ya ─── */}
+        {(loadingInmuebles || preview.length > 0) && (
+          <section aria-labelledby="cat-heading" className="mt-14">
+            <div className="flex items-baseline justify-between gap-3 flex-wrap mb-5">
+              <h2
+                id="cat-heading"
+                className="text-[22px] sm:text-[26px] font-display font-bold leading-tight"
+              >
+                Inmuebles disponibles
+                {!loadingInmuebles && (
+                  <span className="ml-3 font-mono text-[14px] font-normal text-muted">
+                    {totalAvisos} {totalAvisos === 1 ? 'aviso' : 'avisos'}
+                  </span>
+                )}
+              </h2>
+              {totalAvisos > preview.length && (
+                <Link
+                  to="/inmuebles"
+                  className="text-[13px] font-display font-semibold text-ink underline hover:no-underline no-underline whitespace-nowrap"
+                >
+                  Ver los {totalAvisos} →
+                </Link>
+              )}
+            </div>
+
+            {loadingInmuebles ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-surface border border-line-soft rounded h-[320px] animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {preview.map((inm) => (
+                  <InmueblePreviewCard key={inm.id} inm={inm} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         <p className="mt-[34px] text-[12.5px] text-muted max-w-[70ch] border-l-[3px] border-line pl-[14px]">
           <b className="text-ink">
