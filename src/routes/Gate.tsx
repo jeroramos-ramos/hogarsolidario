@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Ticker } from '@/components/Ticker';
+import { Hero } from '@/components/Hero';
 import { StatsBanner } from '@/components/StatsBanner';
 import { useStats } from '@/hooks/useStats';
 
@@ -47,9 +48,10 @@ export function Gate() {
 
   return (
     <>
+      <Hero />
       <Ticker inmuebles={stats?.total ?? 0} familias={0} />
 
-      <section className="wrap pt-14 pb-20">
+      <section className="wrap pt-10 pb-20">
         <div className="max-w-[60ch]">
           <p className="eyebrow">Red solidaria de vivienda · zonas afectadas</p>
           <h1 className="text-[clamp(28px,5vw,44px)] font-bold leading-[1.02]">

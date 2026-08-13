@@ -11,6 +11,10 @@
       content="Inmobiliarias y propietarios ofreciendo casa en Valle, Eje Cafetero y Chocó. Buscar es gratis."
     />
 
+    <!-- Preload del hero: es el LCP de la puerta. Mobile primero (media query). -->
+    <link rel="preload" as="image" href="/hero-mobile.jpg" media="(max-width: 640px)" />
+    <link rel="preload" as="image" href="/hero.jpg" media="(min-width: 641px)" />
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
