@@ -116,6 +116,28 @@ export type DomusImportFailure = {
 
 export type DomusImportResp = DomusImportSuccess | DomusImportFailure;
 
+// ── contact solicitud ──────────────────────────────────────────────
+// Devuelve wa_url si la request está autorizada, o un error tipado si no.
+// La edge function acepta:
+//   - sesión de asesor verificado (auth JWT), o
+//   - propietario_telefono que matchee un inmueble activo publicado.
+export type ContactSolicitudResp =
+  | { ok: true; wa_url: string; telefono: string }
+  | { ok: false; error: string; status: number };
+
+export async function contactarSolicitud(input: {
+  solicitud_id: string;
+  propietario_telefono?: string;
+}): Promise<ContactSolicitudResp> {
+  try {
+    const data = await invoke<{ wa_url: string; telefono: string }>('contact-solicitud', input);
+    return { ok: true, ...data };
+  } catch (err) {
+    const e = err as Error & { status?: number };
+    return { ok: false, error: e.message || 'internal', status: e.status ?? 500 };
+  }
+}
+
 export async function importarDomus(input: { url?: string; html?: string }): Promise<DomusImportResp> {
   try {
     return await invoke<DomusImportResp>('import-domus', input);

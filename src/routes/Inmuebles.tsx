@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppHeader } from '@/components/AppHeader';
 import { Ticker } from '@/components/Ticker';
 import { InmuebleCard } from '@/components/InmuebleCard';
@@ -10,6 +10,8 @@ import { FILTROS_INICIALES, type FiltrosInmuebles, type OrdenInmuebles } from '@
 import type { InmueblePublico } from '@/lib/types';
 import { FLAGS, type FlagKey } from '@/data/flags';
 import type { Zona } from '@/data/municipios';
+
+const PER_PAGE = 12;
 
 // Cuenta valores no-nulos en un array; devuelve pares ordenados por frecuencia desc.
 function frecuencias<T extends string>(items: readonly (T | null | undefined)[]): Array<{ value: T; count: number }> {
@@ -31,8 +33,36 @@ export function Inmuebles() {
   const { data: inmuebles = [], isLoading, error } = useInmuebles();
   const [f, setF] = useState<FiltrosInmuebles>(FILTROS_INICIALES);
   const [openCondiciones, setOpenCondiciones] = useState(false);
+  const [page, setPage] = useState(1);
 
   const resultados = useMemo(() => aplicarFiltros(inmuebles, f), [inmuebles, f]);
+
+  // Reset a página 1 cuando cambian los filtros o el orden. Usamos una key
+  // estable serializada porque f.flags es un Set y useEffect no compara Sets.
+  const filterKey = useMemo(
+    () =>
+      JSON.stringify({
+        d: f.departamento,
+        m: f.municipio,
+        z: f.zona,
+        t: f.tipo,
+        cx: f.canonMax,
+        hm: f.habitacionesMin,
+        r: f.soloRevisadosIngenieria,
+        o: f.orden,
+        fl: [...f.flags].sort(),
+      }),
+    [f],
+  );
+  useEffect(() => {
+    setPage(1);
+  }, [filterKey]);
+
+  const totalPages = Math.max(1, Math.ceil(resultados.length / PER_PAGE));
+  // Si el número de resultados baja (ej. nuevo filtro), la página podría exceder totalPages.
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PER_PAGE;
+  const pageResultados = resultados.slice(pageStart, pageStart + PER_PAGE);
   const sugerencias = useMemo(
     () => (resultados.length === 0 ? suggestFilterRemovals(inmuebles, f, 0) : []),
     [inmuebles, f, resultados.length],
@@ -256,16 +286,103 @@ export function Inmuebles() {
           )}
 
           {!isLoading && !error && resultados.length > 0 && (
-            <div className="flex flex-col gap-3">
-              {resultados.map((inm) => (
-                <InmuebleCard key={inm.id} inm={inm} />
-              ))}
-            </div>
+            <>
+              <div className="flex flex-col gap-3">
+                {pageResultados.map((inm) => (
+                  <InmuebleCard key={inm.id} inm={inm} />
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <Pagination
+                  page={currentPage}
+                  totalPages={totalPages}
+                  onChange={(p) => {
+                    setPage(p);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
     </>
   );
+}
+
+// ───────────────────────── Pagination ─────────────────────────
+// Prev / números de página con elipsis / Next. Mono, sobrio.
+function Pagination({
+  page,
+  totalPages,
+  onChange,
+}: {
+  page: number;
+  totalPages: number;
+  onChange: (page: number) => void;
+}) {
+  const nums = pageNumbers(page, totalPages);
+  const btn =
+    'font-mono text-[13px] px-3 py-2 border border-line rounded hover:border-ink disabled:opacity-40 disabled:cursor-not-allowed bg-surface cursor-pointer';
+  const active = 'bg-ink text-white border-ink';
+  return (
+    <nav
+      aria-label="Paginación"
+      className="mt-8 flex items-center justify-center gap-1 flex-wrap"
+    >
+      <button
+        type="button"
+        onClick={() => onChange(page - 1)}
+        disabled={page <= 1}
+        className={btn}
+        aria-label="Página anterior"
+      >
+        ← Anterior
+      </button>
+      {nums.map((n, i) =>
+        n === 'ellipsis' ? (
+          <span
+            key={`e${i}`}
+            className="font-mono text-[13px] px-2 py-2 text-muted"
+            aria-hidden="true"
+          >
+            …
+          </span>
+        ) : (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            aria-current={n === page ? 'page' : undefined}
+            className={`${btn} ${n === page ? active : ''}`}
+          >
+            {n}
+          </button>
+        ),
+      )}
+      <button
+        type="button"
+        onClick={() => onChange(page + 1)}
+        disabled={page >= totalPages}
+        className={btn}
+        aria-label="Página siguiente"
+      >
+        Siguiente →
+      </button>
+    </nav>
+  );
+}
+
+function pageNumbers(current: number, total: number): Array<number | 'ellipsis'> {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const out: Array<number | 'ellipsis'> = [1];
+  if (current > 4) out.push('ellipsis');
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) out.push(i);
+  if (current < total - 3) out.push('ellipsis');
+  out.push(total);
+  return out;
 }
 
 // ────────────────────────────────────────────────────────────

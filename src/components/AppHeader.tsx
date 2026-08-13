@@ -2,10 +2,9 @@ import { Link, useLocation } from 'react-router-dom';
 
 type Tab = { to: string; label: string };
 
-// /familias (tablero de demanda) sale post-lanzamiento con el panel de inmobiliaria.
-// Hasta entonces no lo mostramos como tab para no llevar a un stub.
 const TABS: Tab[] = [
   { to: '/inmuebles', label: 'Inmuebles disponibles' },
+  { to: '/familias', label: 'Familias buscando' },
   { to: '/publicar/inmueble', label: 'Publicar inmueble' },
   { to: '/publicar/solicitud', label: 'Publicar solicitud' },
 ];

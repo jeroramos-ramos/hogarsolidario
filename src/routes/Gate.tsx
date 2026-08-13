@@ -4,7 +4,9 @@ import { Building2, Home, HandHeart, type LucideIcon } from 'lucide-react';
 import { Ticker } from '@/components/Ticker';
 import { Hero } from '@/components/Hero';
 import { InmueblePreviewCard } from '@/components/InmueblePreviewCard';
+import { SolicitudPreviewCard } from '@/components/SolicitudPreviewCard';
 import { useInmuebles } from '@/hooks/useInmuebles';
+import { useSolicitudes } from '@/hooks/useSolicitudes';
 
 type RoleKey = 'inmobiliaria' | 'propietario' | 'afectado';
 
@@ -51,6 +53,7 @@ const ROLES: RoleCard[] = [
 export function Gate() {
   const navigate = useNavigate();
   const { data: inmuebles = [], isLoading: loadingInmuebles } = useInmuebles();
+  const { data: solicitudes = [] } = useSolicitudes();
 
   // Top 6 por canon ascendente. Familias que llegan por WhatsApp ven
   // vivienda real de una, sin tener que elegir rol.
@@ -59,11 +62,13 @@ export function Gate() {
     return sorted.slice(0, 6);
   }, [inmuebles]);
   const totalAvisos = inmuebles.length;
+  const totalSolicitudes = solicitudes.length;
+  const solicitudesPreview = solicitudes.slice(0, 6);
 
   return (
     <>
       <Hero />
-      <Ticker inmuebles={totalAvisos} familias={0} />
+      <Ticker inmuebles={totalAvisos} familias={totalSolicitudes} />
 
       <section className="wrap pt-8 pb-20">
         <p className="text-base text-ink-2 max-w-[60ch]">
@@ -150,6 +155,36 @@ export function Gate() {
                 ))}
               </div>
             )}
+          </section>
+        )}
+
+        {/* ─── Solicitudes de familias — solo si hay ≥ 1 ─── */}
+        {solicitudesPreview.length > 0 && (
+          <section aria-labelledby="sol-heading" className="mt-14">
+            <div className="flex items-baseline justify-between gap-3 flex-wrap mb-5">
+              <h2
+                id="sol-heading"
+                className="text-[22px] sm:text-[26px] font-display font-bold leading-tight"
+              >
+                Familias buscando vivienda
+                <span className="ml-3 font-mono text-[14px] font-normal text-muted">
+                  {totalSolicitudes} {totalSolicitudes === 1 ? 'solicitud' : 'solicitudes'}
+                </span>
+              </h2>
+              {totalSolicitudes > solicitudesPreview.length && (
+                <Link
+                  to="/familias"
+                  className="text-[13px] font-display font-semibold text-ink underline hover:no-underline no-underline whitespace-nowrap"
+                >
+                  Ver todas →
+                </Link>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {solicitudesPreview.map((s) => (
+                <SolicitudPreviewCard key={s.id} s={s} />
+              ))}
+            </div>
           </section>
         )}
 
