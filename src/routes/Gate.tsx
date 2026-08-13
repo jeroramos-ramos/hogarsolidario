@@ -51,22 +51,12 @@ export function Gate() {
       <Hero />
       <Ticker inmuebles={stats?.total ?? 0} familias={0} />
 
-      <section className="wrap pt-10 pb-20">
-        <div className="max-w-[60ch]">
-          <p className="eyebrow">Red solidaria de vivienda · zonas afectadas</p>
-          <h1 className="text-[clamp(28px,5vw,44px)] font-bold leading-[1.02]">
-            Un techo mientras
-            <br />
-            volvemos a levantar
-            <br />
-            <em className="not-italic text-muted">lo que se cayó.</em>
-          </h1>
-          <p className="text-base text-ink-2 mt-4">
-            Conectamos a las familias que quedaron sin vivienda por el terremoto con inmobiliarias y
-            propietarios del Valle, el Eje Cafetero y el Chocó que están abriendo sus inmuebles.
-            Buscar es gratis y no pedimos documentos.
-          </p>
-        </div>
+      <section className="wrap pt-8 pb-20">
+        <p className="text-base text-ink-2 max-w-[60ch]">
+          Conectamos a las familias que quedaron sin vivienda por el terremoto con inmobiliarias
+          y propietarios del Valle, el Eje Cafetero y el Chocó que están abriendo sus inmuebles.
+          Buscar es gratis y no pedimos documentos.
+        </p>
 
         <StatsBanner />
 
