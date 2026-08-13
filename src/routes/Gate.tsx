@@ -18,8 +18,8 @@ const ROLES: RoleCard[] = [
     key: 'inmobiliaria',
     title: 'Soy Inmobiliaria Solidaria',
     body: 'Cargue su inventario disponible, vea en tiempo real qué está pidiendo cada familia y contáctela directamente. Sin comisión para nosotros.',
-    cta: 'Registrar inmobiliaria →',
-    to: '/panel',
+    cta: 'Publicar inmueble →',
+    to: '/publicar/inmueble?rol=inmobiliaria',
   },
   {
     num: '02',
@@ -27,7 +27,7 @@ const ROLES: RoleCard[] = [
     title: 'Soy Propietario Solidario',
     body: 'Tiene un apartamento, una casa o una habitación desocupada. La ofrece en arriendo justo o cedida sin costo mientras pasa la emergencia.',
     cta: 'Publicar mi inmueble →',
-    to: '/publicar/inmueble',
+    to: '/publicar/inmueble?rol=propietario',
   },
   {
     num: '03',

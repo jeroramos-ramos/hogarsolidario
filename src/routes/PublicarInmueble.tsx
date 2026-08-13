@@ -216,6 +216,12 @@ export function PublicarInmueble() {
       <AppHeader />
 
       <div className="wrap max-w-[780px] py-6 pb-16">
+        {esInmo && (
+          <div className="border-l-[3px] border-line bg-surface p-[13px] pl-4 rounded-r text-[13px] mb-4">
+            Por ahora la carga es de un inmueble a la vez. El panel para gestionar inventario
+            completo llega en los próximos días.
+          </div>
+        )}
         <div className="border-l-[3px] border-signal bg-signal-soft p-[13px] pl-4 rounded-r text-[13px] mb-6">
           <b>Antes de publicar.</b> Solo inmuebles habitables. Mantené el canon del mercado
           previo al 10 de agosto: subir el precio aprovechando la emergencia es sancionable y
