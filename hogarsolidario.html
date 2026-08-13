@@ -1,0 +1,723 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F2A2E; --ink-2:#1B3D42; --paper:#EDF0EE; --surface:#FFFFFF;
+    --line:#CBD6D2; --line-soft:#E1E8E5; --muted:#5E7175;
+    --signal:#F0A202; --signal-soft:#FDF1D6; --signal-line:#EFD79B;
+    --verify:#1D7A5F; --verify-soft:#E2F1EB; --verify-line:#BFE0D3;
+    --alert:#B23A20; --alert-soft:#FAE7E2;
+    --r:4px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  .rf{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--ink);background:var(--paper);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .rf h1,.rf h2,.rf h3,.rf h4{font-family:"Archivo",Helvetica,Arial,sans-serif;letter-spacing:-.02em;margin:0}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10.5px;text-transform:uppercase;
+           letter-spacing:.12em;color:var(--muted);margin:0 0 10px}
+
+  .ticker{background:var(--ink);color:#DDE6E3;font-family:"IBM Plex Mono",monospace;
+          font-size:11.5px;letter-spacing:.04em;padding:9px 0}
+  .ticker .wrap{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .ticker .dot{width:7px;height:7px;border-radius:50%;background:var(--signal);flex:none;animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .ticker b{color:#fff;font-weight:500}
+
+  /* ---------- PUERTA DE ENTRADA ---------- */
+  .gate{padding:56px 0 80px}
+  .gate .lede{max-width:60ch}
+  .gate h1{font-size:clamp(32px,6vw,52px);font-weight:700;line-height:1.02}
+  .gate h1 em{font-style:normal;color:var(--muted)}
+  .gate .lede p{font-size:16px;color:var(--ink-2);margin:16px 0 0}
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:38px}
+  @media(max-width:820px){.roles{grid-template-columns:1fr}}
+  .role{
+    text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:22px;cursor:pointer;font-family:inherit;color:inherit;
+    display:flex;flex-direction:column;gap:9px;transition:border-color .15s,transform .15s;
+    border-top:3px solid var(--line);
+  }
+  .role:hover{border-color:var(--ink);border-top-color:var(--signal);transform:translateY(-2px)}
+  .role:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+  .role .num{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);letter-spacing:.1em}
+  .role h3{font-size:19px;font-weight:600}
+  .role p{font-size:13.5px;color:var(--muted);margin:0;flex:1}
+  .role .go{font-family:"Archivo",sans-serif;font-weight:600;font-size:13px;color:var(--ink);
+            border-top:1px solid var(--line-soft);padding-top:11px}
+  .gate .disc{margin-top:34px;font-size:12.5px;color:var(--muted);max-width:70ch;
+              border-left:3px solid var(--line);padding-left:14px}
+
+  /* ---------- APP ---------- */
+  header.top{background:var(--surface);border-bottom:1px solid var(--line)}
+  .brandrow{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;flex-wrap:wrap}
+  .brand{display:flex;align-items:baseline;gap:12px}
+  .brand h2{font-size:22px;font-weight:700}
+  .brand .region{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);letter-spacing:.08em}
+  .whoami{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted)}
+  .rolepill{background:var(--signal-soft);border:1px solid var(--signal-line);color:#7A5502;
+            font-weight:600;font-size:11.5px;padding:4px 10px;border-radius:100px}
+  .tabs{display:flex;gap:2px;overflow-x:auto}
+  .tab{appearance:none;border:1px solid var(--line);border-bottom:none;background:transparent;
+       font-family:"Archivo",sans-serif;font-size:13px;font-weight:600;color:var(--muted);
+       padding:11px 16px;cursor:pointer;border-radius:var(--r) var(--r) 0 0;margin-bottom:-1px;white-space:nowrap}
+  .tab[aria-selected="true"]{background:var(--paper);color:var(--ink);box-shadow:inset 0 3px 0 var(--signal)}
+  .tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .tab .cnt{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin-left:6px}
+
+  .cols{display:grid;grid-template-columns:262px 1fr;gap:26px;padding:24px 0 60px;align-items:start}
+  @media(max-width:880px){.cols{grid-template-columns:1fr}}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+  aside.panel{position:sticky;top:14px}
+  @media(max-width:880px){aside.panel{position:static}}
+  .fgroup{margin-bottom:15px}
+  label.fl{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+  .rf input[type=text],.rf input[type=number],.rf input[type=tel],.rf input[type=url],.rf select,.rf textarea{
+    width:100%;font-family:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r);padding:9px 10px}
+  .rf textarea{resize:vertical}
+  .rf input:focus,.rf select:focus,.rf textarea:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:var(--ink)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:12px;font-weight:500;padding:7px 11px;border:1px solid var(--line);border-radius:100px;
+        background:var(--surface);cursor:pointer;color:var(--ink-2);font-family:inherit}
+  .chip[data-on="1"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  .linkbtn{background:none;border:none;padding:0;color:var(--muted);font-size:12px;
+           text-decoration:underline;cursor:pointer;font-family:inherit}
+  .linkbtn:hover{color:var(--ink)}
+
+  .resbar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .resbar .n{font-family:"IBM Plex Mono",monospace;font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(298px,1fr));gap:14px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;
+        display:flex;flex-direction:column;gap:11px;transition:border-color .15s,transform .15s}
+  .card:hover{border-color:var(--ink);transform:translateY(-1px)}
+  .card .code{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+  .card h3{font-size:16.5px;font-weight:600;line-height:1.25}
+  .card .loc{font-size:13px;color:var(--muted)}
+  .card p.txt{font-size:13px;color:var(--muted);margin:0}
+  .price{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;line-height:1}
+  .price small{font-size:11px;font-weight:400;color:var(--muted)}
+  .price.free{color:var(--verify)}
+  .specs{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);
+         border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:9px 0}
+  .specs b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+  .badges{display:flex;flex-wrap:wrap;gap:5px}
+  .badge{font-size:10.5px;font-weight:600;padding:4px 8px;border-radius:2px;background:var(--paper);
+         color:var(--ink-2);border:1px solid var(--line-soft)}
+  .badge.key{background:var(--signal-soft);border-color:var(--signal-line);color:#7A5502}
+  .badge.ok{background:var(--verify-soft);border-color:var(--verify-line);color:#125C46}
+  .badge.demo{background:var(--alert-soft);border-color:#EDCABF;color:var(--alert)}
+  .who{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .who .tick{color:var(--verify);font-weight:700}
+  .cardfoot{display:flex;gap:8px;align-items:center;margin-top:auto;padding-top:4px}
+  .btn{font-family:"Archivo",sans-serif;font-weight:600;font-size:13.5px;border-radius:var(--r);
+       padding:10px 16px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;
+       text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+  .btn:hover{background:var(--ink-2)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.ghost:hover{background:var(--paper)}
+  .btn.sm{font-size:12px;padding:8px 12px}
+  .btn.wide{width:100%}
+  .btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  .report{margin-left:auto;background:none;border:none;color:var(--muted);font-size:11px;
+          cursor:pointer;text-decoration:underline;font-family:inherit}
+  .report:hover{color:var(--alert)}
+  .match{font-family:"IBM Plex Mono",monospace;font-size:11.5px;background:var(--verify-soft);
+         border:1px solid var(--verify-line);color:#125C46;padding:6px 9px;border-radius:2px}
+
+  .empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);
+         padding:44px 26px;text-align:center;grid-column:1/-1}
+  .empty h3{font-size:19px;margin-bottom:8px}
+  .empty p{color:var(--muted);font-size:14px;max-width:46ch;margin:0 auto 18px}
+
+  .form-wrap{max-width:780px;padding:24px 0 70px}
+  .note{border-left:3px solid var(--signal);background:var(--signal-soft);padding:13px 15px;
+        font-size:13px;border-radius:0 var(--r) var(--r) 0;margin-bottom:22px}
+  .note.calm{border-left-color:var(--verify);background:var(--verify-soft)}
+  fieldset{border:1px solid var(--line);border-radius:var(--r);padding:18px;margin:0 0 16px;background:var(--surface)}
+  legend{font-family:"Archivo",sans-serif;font-weight:600;font-size:12.5px;padding:0 8px;
+         text-transform:uppercase;letter-spacing:.07em}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .row.three{grid-template-columns:1fr 1fr 1fr}
+  .row:last-child{margin-bottom:0}
+  @media(max-width:640px){.row,.row.three{grid-template-columns:1fr}}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  @media(max-width:640px){.checks{grid-template-columns:1fr}}
+  .check{display:flex;gap:9px;align-items:flex-start;font-size:13px;cursor:pointer;
+         border:1px solid var(--line-soft);border-radius:var(--r);padding:10px}
+  .check:hover{border-color:var(--line)}
+  .check input{margin-top:2px;accent-color:var(--ink);flex:none}
+  .check .hint{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+  .hintline{font-size:11.5px;color:var(--muted);margin-top:4px}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:var(--ink);color:#fff;
+         font-size:13.5px;padding:12px 20px;border-radius:var(--r);z-index:50;box-shadow:0 6px 22px rgba(15,42,46,.28)}
+  footer.rfoot{border-top:1px solid var(--line);padding:22px 0 40px;font-size:12px;color:var(--muted)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="rf">
+  <div class="ticker">
+    <div class="wrap">
+      <span class="dot" aria-hidden="true"></span>
+      <span>SISMO 10 AGO 2026 · M7.4</span>
+      <span>VALLE · RISARALDA · QUINDÍO · CALDAS · CHOCÓ</span>
+      <span id="tk1"><b>0</b> INMUEBLES</span>
+      <span id="tk2"><b>0</b> FAMILIAS BUSCANDO</span>
+    </div>
+  </div>
+
+  <!-- ============ PUERTA ============ -->
+  <section id="gate" class="wrap gate">
+    <div class="lede">
+      <p class="eyebrow">Red solidaria de vivienda · zonas afectadas</p>
+      <h1>Un techo mientras<br>volvemos a levantar<br><em>lo que se cayó.</em></h1>
+      <p>Conectamos a las familias que quedaron sin vivienda por el terremoto con inmobiliarias y
+      propietarios del Valle, el Eje Cafetero y el Chocó que están abriendo sus inmuebles. Buscar es gratis y no pedimos documentos.</p>
+    </div>
+
+    <div class="roles">
+      <button class="role" data-role="inmobiliaria">
+        <span class="num">01</span>
+        <h3>Soy Inmobiliaria Solidaria</h3>
+        <p>Cargue su inventario disponible, vea en tiempo real qué está pidiendo cada familia y contáctela
+        directamente. Sin comisión para nosotros.</p>
+        <span class="go">Registrar inmobiliaria →</span>
+      </button>
+      <button class="role" data-role="propietario">
+        <span class="num">02</span>
+        <h3>Soy Propietario Solidario</h3>
+        <p>Tiene un apartamento, una casa o una habitación desocupada. La ofrece en arriendo justo
+        o cedida sin costo mientras pasa la emergencia.</p>
+        <span class="go">Publicar mi inmueble →</span>
+      </button>
+      <button class="role" data-role="afectado">
+        <span class="num">03</span>
+        <h3>Soy afectado por el terremoto</h3>
+        <p>Busque entre los inmuebles disponibles o deje su solicitud: cuántos son, qué necesitan y
+        hasta cuánto pueden pagar. Las inmobiliarias la verán.</p>
+        <span class="go">Buscar vivienda →</span>
+      </button>
+    </div>
+
+    <p class="disc"><b>Hogar Solidario no arrienda, no cobra y no verifica los avisos.</b> Somos un punto de encuentro.
+    Visite siempre el inmueble antes de comprometerse, exija contrato escrito y no consigne dinero a cuentas
+    personales ni pague nada por "separar". Si alguien le exige plata antes de mostrarle la vivienda, es una estafa.</p>
+  </section>
+
+  <!-- ============ APP ============ -->
+  <div id="app" hidden>
+    <header class="top">
+      <div class="wrap">
+        <div class="brandrow">
+          <div class="brand">
+            <h2>Hogar Solidario</h2>
+            <span class="region">HOGARSOLIDARIO.CO</span>
+          </div>
+          <div class="whoami">
+            <span class="rolepill" id="rolePill">—</span>
+            <button class="linkbtn" id="btnCambiar">Cambiar</button>
+          </div>
+        </div>
+        <div class="tabs" role="tablist" id="tabs"></div>
+      </div>
+    </header>
+
+    <!-- inventario -->
+    <main id="vInv" hidden>
+      <div class="wrap cols">
+        <aside class="panel">
+          <p class="eyebrow">Filtros</p>
+          <div class="fgroup"><label class="fl" for="fDepto">Departamento</label><select id="fDepto"></select></div>
+          <div class="fgroup"><label class="fl" for="fMun">Municipio</label><select id="fMun"></select></div>
+          <div class="fgroup"><label class="fl" for="fZona">Zona</label><select id="fZona"></select></div>
+          <div class="fgroup"><label class="fl" for="fTipo">Tipo</label><select id="fTipo"></select></div>
+          <div class="fgroup"><label class="fl" for="fPrecio">Canon máximo (COP/mes)</label>
+            <input type="number" id="fPrecio" placeholder="Sin límite" min="0" step="50000"></div>
+          <div class="fgroup"><label class="fl" for="fHab">Habitaciones mínimas</label>
+            <select id="fHab"><option value="">Cualquiera</option><option value="1">1+</option>
+            <option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></div>
+          <div class="fgroup"><p class="eyebrow" style="margin-bottom:8px">Condiciones</p>
+            <div class="chips" id="fChips"></div></div>
+          <button class="linkbtn" id="btnLimpiar">Quitar todos los filtros</button>
+        </aside>
+        <section>
+          <div class="resbar">
+            <span class="n" id="resInv">—</span>
+            <label class="fl" style="margin:0;display:flex;gap:8px;align-items:center;font-weight:400">Ordenar
+              <select id="fOrden" style="width:auto">
+                <option value="recientes">Más recientes</option>
+                <option value="baratos">Canon más bajo</option>
+                <option value="grandes">Más habitaciones</option>
+              </select></label>
+          </div>
+          <div class="grid" id="gridInv"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- demanda -->
+    <main id="vDem" hidden>
+      <div class="wrap" style="padding:24px 0 60px">
+        <div class="note calm" id="demNote"></div>
+        <div class="resbar">
+          <span class="n" id="resDem">—</span>
+          <label class="fl" style="margin:0;display:flex;gap:8px;align-items:center;font-weight:400">Municipio
+            <select id="dMun" style="width:auto"></select></label>
+        </div>
+        <div class="grid" id="gridDem"></div>
+      </div>
+    </main>
+
+    <!-- publicar -->
+    <main id="vPub" hidden>
+      <div class="wrap form-wrap" id="pubHost"></div>
+    </main>
+
+    <footer class="rfoot">
+      <div class="wrap">
+        <p style="margin:0 0 8px">hogarsolidario.co es un punto de encuentro. No verificamos los avisos: valide el inmueble
+        en persona, exija contrato y nunca consigne a cuentas personales.</p>
+        <p style="margin:0">El subsidio temporal de arriendo lo tramitan la alcaldía de su municipio, la UNGRD y el
+        Ministerio de Vivienda; requiere estar en el censo de damnificados. ·
+        <button class="linkbtn" id="btnDemo">Cargar ejemplos de prueba</button> ·
+        <button class="linkbtn" id="btnReset">Borrar todo</button></p>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  const K_INM='hogarsolidario:inmuebles:v1', K_SOL='hogarsolidario:solicitudes:v1', K_ROL='hogarsolidario:rol';
+
+  const DEPTOS={
+    "Valle del Cauca":["Cali","Palmira","Yumbo","Jamundí","Candelaria","Buenaventura","Tuluá","Buga","Cartago",
+      "Florida","Pradera","El Cerrito","Ginebra","Guacarí","Zarzal","Roldanillo","Sevilla","Caicedonia","La Unión",
+      "Dagua","Andalucía","Bugalagrande","San Pedro","Restrepo","Vijes","Yotoco","La Cumbre","Calima–El Darién",
+      "Riofrío","Trujillo","Obando","Toro","La Victoria","Bolívar","Versalles","El Dovio","Argelia","Ansermanuevo",
+      "Alcalá","Ulloa","El Águila","El Cairo"],
+    "Risaralda":["Pereira","Dosquebradas","Santa Rosa de Cabal","La Virginia","Marsella","Belén de Umbría","Apía",
+      "Santuario","Quinchía","Guática","Mistrató","Pueblo Rico","Balboa","La Celia"],
+    "Quindío":["Armenia","Calarcá","La Tebaida","Montenegro","Quimbaya","Circasia","Filandia","Salento","Córdoba",
+      "Pijao","Buenavista","Génova"],
+    "Caldas":["Manizales","Villamaría","Chinchiná","Palestina","Neira","Anserma","Riosucio","Supía","Salamina",
+      "Aguadas","Viterbo","Belalcázar","Filadelfia","Manzanares","Pensilvania","Marmato","La Dorada","Samaná"],
+    "Chocó":["Quibdó","San José del Palmar","Istmina","Tadó","Condoto","Nóvita","Sipí","Cértegui","Unión Panamericana",
+      "Bagadó","Lloró","Atrato","Medio San Juan","Litoral del San Juan","Río Iró"]
+  };
+  const MUN=[], DEPTO_DE={};
+  for(const d in DEPTOS) DEPTOS[d].forEach(m=>{MUN.push(m); DEPTO_DE[m]=d;});
+
+  function fillMun(el,first,depto){
+    const opt=m=>`<option>${m}</option>`;
+    let html=first?`<option value="">${first}</option>`:'';
+    if(depto) html+=DEPTOS[depto].map(opt).join('');
+    else html+=Object.keys(DEPTOS).map(d=>`<optgroup label="${d}">${DEPTOS[d].map(opt).join('')}</optgroup>`).join('');
+    el.innerHTML=html;
+  }
+  const ZONAS=["Norte","Sur","Oriente","Occidente","Centro","Ladera","Zona rural"];
+  const TIPOS=["Apartamento","Casa","Aparta-estudio","Habitación","Casa-finca","Albergue temporal"];
+  const URG=["Estamos en un albergue","Estamos donde familiares","Vivienda con daños, aún adentro","Arriendo terminado por el sismo"];
+
+  const FLAGS=[
+    {k:'sinFiador',  l:'Sin fiador ni codeudor', h:'No exige finca raíz ni aseguradora'},
+    {k:'sinDeposito',l:'Sin depósito inicial',   h:'No cobra mes adelantado'},
+    {k:'subsidio',   l:'Acepta subsidio de arriendo', h:'Recibe el pago del programa estatal'},
+    {k:'inmediata',  l:'Entrega inmediata',      h:'Se puede ocupar hoy'},
+    {k:'gratuito',   l:'Sin costo (cedido)',     h:'Sin canon mientras dura la emergencia'},
+    {k:'revisado',   l:'Sin daños estructurales',h:'Revisado después del sismo'},
+    {k:'amoblado',   l:'Amoblado',               h:'Camas y enseres básicos'},
+    {k:'mascotas',   l:'Acepta mascotas',        h:''},
+    {k:'accesible',  l:'Accesible',              h:'Apto para movilidad reducida'}
+  ];
+  const NEEDS=[
+    {k:'sinFiador', l:'No tengo fiador'},{k:'subsidio',l:'Voy a pagar con el subsidio'},
+    {k:'amoblado',  l:'Lo necesito amoblado'},{k:'mascotas',l:'Tengo mascota'},
+    {k:'accesible', l:'Necesito acceso sin escaleras'},{k:'inmediata',l:'Necesito entrar de inmediato'}
+  ];
+
+  const ROLES={
+    inmobiliaria:{pill:'Inmobiliaria Solidaria',tabs:['pub','dem','inv'],form:'inmueble'},
+    propietario :{pill:'Propietario Solidario', tabs:['pub','dem','inv'],form:'inmueble'},
+    afectado    :{pill:'Afectado por el terremoto',tabs:['inv','pub','dem'],form:'solicitud'}
+  };
+  const TABLABEL={inv:'Inmuebles disponibles',dem:'Familias buscando',pub:null};
+
+  let inmuebles=[], solicitudes=[], rol=null, tab='inv';
+  let F={depto:'',mun:'',zona:'',tipo:'',precio:'',hab:'',orden:'recientes',flags:new Set()};
+  let dMun='';
+
+  const $=id=>document.getElementById(id);
+  const cop=n=>n>0?'$'+n.toLocaleString('es-CO'):'Sin costo';
+  const esc=s=>String(s??'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const sel=(el,arr,first)=>el.innerHTML=(first?`<option value="">${first}</option>`:'')+arr.map(v=>`<option>${v}</option>`).join('');
+  function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;
+    document.body.appendChild(t);setTimeout(()=>t.remove(),3200);}
+
+  /* ---------- datos ---------- */
+  async function load(){
+    try{const r=await window.storage.get(K_INM,true); inmuebles=r&&r.value?JSON.parse(r.value):[];}catch(e){inmuebles=[]}
+    try{const r=await window.storage.get(K_SOL,true); solicitudes=r&&r.value?JSON.parse(r.value):[];}catch(e){solicitudes=[]}
+    try{const r=await window.storage.get(K_ROL,false); if(r&&r.value) setRol(r.value,true);}catch(e){}
+    render();
+  }
+  const saveInm=()=>window.storage.set(K_INM,JSON.stringify(inmuebles),true).catch(()=>toast('No se pudo guardar.'));
+  const saveSol=()=>window.storage.set(K_SOL,JSON.stringify(solicitudes),true).catch(()=>toast('No se pudo guardar.'));
+
+  /* ---------- controles ---------- */
+  sel($('fDepto'),Object.keys(DEPTOS),'Todos los afectados');
+  fillMun($('fMun'),'Todos'); fillMun($('dMun'),'Todos los municipios');
+  sel($('fZona'),ZONAS,'Todas'); sel($('fTipo'),TIPOS,'Todos');
+  $('fChips').innerHTML=FLAGS.map(f=>`<button class="chip" data-flag="${f.k}" data-on="0">${f.l}</button>`).join('');
+  $('fChips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;
+    const on=b.dataset.on==='1';b.dataset.on=on?'0':'1';
+    on?F.flags.delete(b.dataset.flag):F.flags.add(b.dataset.flag);render();});
+  $('fDepto').addEventListener('input',()=>{
+    F.depto=$('fDepto').value; F.mun='';
+    fillMun($('fMun'),F.depto?'Todos en '+F.depto:'Todos',F.depto||null);
+    render();
+  });
+  ['fMun','fZona','fTipo','fPrecio','fHab','fOrden'].forEach(id=>$(id).addEventListener('input',()=>{
+    F.mun=$('fMun').value;F.zona=$('fZona').value;F.tipo=$('fTipo').value;
+    F.precio=$('fPrecio').value;F.hab=$('fHab').value;F.orden=$('fOrden').value;render();}));
+  $('btnLimpiar').addEventListener('click',()=>{F={depto:'',mun:'',zona:'',tipo:'',precio:'',hab:'',orden:'recientes',flags:new Set()};
+    fillMun($('fMun'),'Todos');
+    ['fDepto','fMun','fZona','fTipo','fPrecio','fHab'].forEach(i=>$(i).value='');$('fOrden').value='recientes';
+    document.querySelectorAll('#fChips .chip').forEach(c=>c.dataset.on='0');render();});
+  $('dMun').addEventListener('input',()=>{dMun=$('dMun').value;render()});
+
+  document.querySelectorAll('.role').forEach(b=>b.addEventListener('click',()=>{
+    setRol(b.dataset.role); window.storage.set(K_ROL,b.dataset.role,false).catch(()=>{}); render();
+  }));
+  $('btnCambiar').addEventListener('click',()=>{
+    rol=null; $('app').hidden=true; $('gate').hidden=false;
+    window.storage.delete(K_ROL,false).catch(()=>{}); window.scrollTo(0,0);
+  });
+
+  function setRol(r,silent){
+    if(!ROLES[r])return; rol=r; tab=ROLES[r].tabs[0];
+    $('gate').hidden=true; $('app').hidden=false;
+    $('rolePill').textContent=ROLES[r].pill;
+    if(!silent) window.scrollTo(0,0);
+  }
+
+  function buildTabs(){
+    const cfg=ROLES[rol]; if(!cfg)return;
+    const pubLabel=cfg.form==='solicitud'?'Publicar lo que necesito':'Publicar inmueble';
+    $('tabs').innerHTML=cfg.tabs.map(t=>{
+      const lbl=t==='pub'?pubLabel:TABLABEL[t];
+      const c=t==='inv'?vis().length:t==='dem'?solicitudes.length:'';
+      return `<button class="tab" role="tab" data-tab="${t}" aria-selected="${t===tab}">${lbl}${c!==''?`<span class="cnt">${c}</span>`:''}</button>`;
+    }).join('');
+  }
+  $('tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
+    tab=b.dataset.tab;render();window.scrollTo({top:0,behavior:'smooth'})});
+
+  /* ---------- formularios ---------- */
+  function formInmueble(){
+    const esInmo=rol==='inmobiliaria';
+    return `
+    <div class="note"><b>Antes de publicar.</b> Solo inmuebles habitables y sin daños estructurales por el sismo.
+    Mantenga el canon del mercado previo al 10 de agosto: subir el precio aprovechando la emergencia es sancionable
+    y aquí se retira el aviso.</div>
+    <fieldset><legend>${esInmo?'La inmobiliaria':'El propietario'}</legend>
+      <div class="row">
+        <div><label class="fl" for="pQuien">${esInmo?'Nombre de la inmobiliaria':'Su nombre completo'}</label>
+          <input type="text" id="pQuien"></div>
+        <div><label class="fl" for="pDoc">${esInmo?'NIT':'Cédula (opcional)'}</label><input type="text" id="pDoc"></div>
+      </div>
+      <div class="row">
+        <div><label class="fl" for="pTel">WhatsApp de contacto</label><input type="tel" id="pTel" placeholder="3001234567">
+          <span class="hintline">10 dígitos. Es el botón que verá la familia.</span></div>
+        <div><label class="fl" for="pFotos">Enlace con fotos (opcional)</label><input type="url" id="pFotos" placeholder="https://…">
+          <span class="hintline">Drive, Dropbox o un álbum público.</span></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>El inmueble</legend>
+      <div class="row">
+        <div><label class="fl" for="pTipo">Tipo</label><select id="pTipo"></select></div>
+        <div><label class="fl" for="pMun">Municipio</label><select id="pMun"></select></div>
+      </div>
+      <div class="row">
+        <div><label class="fl" for="pZona">Zona</label><select id="pZona"></select></div>
+        <div><label class="fl" for="pBarrio">Barrio o sector</label><input type="text" id="pBarrio" placeholder="Ej: El Ingenio"></div>
+      </div>
+      <div class="row">
+        <div><label class="fl" for="pCanon">Canon mensual (COP)</label>
+          <input type="number" id="pCanon" min="0" step="50000" placeholder="0 si lo cede">
+          <span class="hintline">Escriba 0 si lo entrega sin costo.</span></div>
+        <div><label class="fl" for="pDur">Duración mínima</label>
+          <select id="pDur"><option>1 mes</option><option selected>3 meses</option><option>6 meses</option><option>12 meses</option></select></div>
+      </div>
+      <div class="row three">
+        <div><label class="fl" for="pHab">Habitaciones</label><input type="number" id="pHab" min="0" max="12" value="2"></div>
+        <div><label class="fl" for="pBanos">Baños</label><input type="number" id="pBanos" min="0" max="8" value="1"></div>
+        <div><label class="fl" for="pArea">Área (m²)</label><input type="number" id="pArea" min="0" placeholder="60"></div>
+      </div>
+      <div class="row">
+        <div><label class="fl" for="pDisp">Disponible</label>
+          <select id="pDisp"><option value="Inmediata">Hoy mismo</option><option value="3 días">En 3 días</option>
+          <option value="1 semana">En 1 semana</option><option value="15 días">En 15 días</option></select></div>
+        <div><label class="fl" for="pNotas">Detalle corto</label>
+          <input type="text" id="pNotas" placeholder="Ej: tercer piso, agua y luz activas"></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Condiciones</legend>
+      <div class="checks">${FLAGS.map(f=>`<label class="check"><input type="checkbox" data-p="${f.k}">
+        <span>${f.l}${f.h?`<span class="hint">${f.h}</span>`:''}</span></label>`).join('')}</div>
+    </fieldset>
+    <button class="btn wide" id="btnGuardar">Publicar inmueble</button>
+    <p class="hintline" style="text-align:center;margin-top:10px">Queda visible de inmediato para todas las familias.</p>`;
+  }
+
+  function formSolicitud(){
+    return `
+    <div class="note calm"><b>Esto no es una solicitud de subsidio.</b> Es un aviso para que las inmobiliarias y
+    propietarios de las zonas afectadas sepan qué necesita y la contacten. No pedimos documentos ni cobramos nada.</div>
+    <fieldset><legend>Quién busca</legend>
+      <div class="row">
+        <div><label class="fl" for="sNombre">Su nombre</label><input type="text" id="sNombre" placeholder="Nombre y apellido"></div>
+        <div><label class="fl" for="sTel">WhatsApp</label><input type="tel" id="sTel" placeholder="3001234567">
+          <span class="hintline">Solo lo verán quienes ofrecen vivienda.</span></div>
+      </div>
+      <div class="row three">
+        <div><label class="fl" for="sAdultos">Adultos</label><input type="number" id="sAdultos" min="1" max="20" value="2"></div>
+        <div><label class="fl" for="sNinos">Niños</label><input type="number" id="sNinos" min="0" max="20" value="0"></div>
+        <div><label class="fl" for="sMayores">Adultos mayores</label><input type="number" id="sMayores" min="0" max="20" value="0"></div>
+      </div>
+      <div class="row">
+        <div><label class="fl" for="sUrg">¿Dónde están ahora?</label><select id="sUrg"></select></div>
+        <div><label class="fl" for="sCenso">¿Están en el censo de damnificados?</label>
+          <select id="sCenso"><option>Sí</option><option>No</option><option selected>En trámite</option></select></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Qué necesitan</legend>
+      <div class="row">
+        <div><label class="fl" for="sMun">Municipio donde busca</label><select id="sMun"></select></div>
+        <div><label class="fl" for="sZona">Zona preferida</label><select id="sZona"></select></div>
+      </div>
+      <div class="row three">
+        <div><label class="fl" for="sTipo">Tipo</label><select id="sTipo"></select></div>
+        <div><label class="fl" for="sHab">Habitaciones mínimas</label><input type="number" id="sHab" min="1" max="8" value="2"></div>
+        <div><label class="fl" for="sTope">Hasta cuánto puede pagar</label><input type="number" id="sTope" min="0" step="50000" placeholder="800000"></div>
+      </div>
+      <div class="row" style="grid-template-columns:1fr">
+        <div><label class="fl" for="sNota">Algo más que deban saber</label>
+          <textarea id="sNota" rows="2" placeholder="Ej: trabajo en el sur de Cali, los niños estudian cerca al barrio San Fernando."></textarea></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Su situación</legend>
+      <div class="checks">${NEEDS.map(n=>`<label class="check"><input type="checkbox" data-s="${n.k}"><span>${n.l}</span></label>`).join('')}</div>
+    </fieldset>
+    <button class="btn wide" id="btnGuardar">Publicar mi solicitud</button>
+    <p class="hintline" style="text-align:center;margin-top:10px">Puede seguir buscando por su cuenta mientras la contactan.</p>`;
+  }
+
+  function mountForm(){
+    const esSol=ROLES[rol].form==='solicitud';
+    $('pubHost').innerHTML=esSol?formSolicitud():formInmueble();
+    if(esSol){
+      fillMun($('sMun'),null); sel($('sZona'),ZONAS,'Cualquiera'); sel($('sTipo'),TIPOS,null); sel($('sUrg'),URG,null);
+      $('btnGuardar').addEventListener('click',guardarSolicitud);
+    }else{
+      fillMun($('pMun'),null); sel($('pZona'),ZONAS,null); sel($('pTipo'),TIPOS,null);
+      $('btnGuardar').addEventListener('click',guardarInmueble);
+    }
+  }
+
+  async function guardarInmueble(){
+    const tel=$('pTel').value.replace(/\D/g,'');
+    if(!$('pQuien').value.trim())return toast('Falta quién publica.');
+    if(tel.length<10)return toast('El WhatsApp debe tener 10 dígitos.');
+    if(!$('pBarrio').value.trim())return toast('Falta el barrio o sector.');
+    const flags={};document.querySelectorAll('#pubHost [data-p]').forEach(i=>flags[i.dataset.p]=i.checked);
+    if(flags.gratuito)flags.sinDeposito=true;
+    inmuebles.unshift({
+      id:'RF-'+Date.now().toString(36).toUpperCase().slice(-6), rol,
+      quien:$('pQuien').value.trim(), doc:$('pDoc').value.trim(), tel, fotos:$('pFotos').value.trim(),
+      tipo:$('pTipo').value, mun:$('pMun').value, depto:DEPTO_DE[$('pMun').value]||'',
+      zona:$('pZona').value, barrio:$('pBarrio').value.trim(),
+      canon:flags.gratuito?0:Math.max(0,parseInt($('pCanon').value||'0',10)),
+      hab:+$('pHab').value||0, banos:+$('pBanos').value||0, area:+$('pArea').value||0,
+      disp:$('pDisp').value, dur:$('pDur').value, notas:$('pNotas').value.trim(),
+      flags, reportes:0, demo:false, fecha:Date.now()
+    });
+    await saveInm(); mountForm(); tab='inv'; render();
+    toast('Publicado. Ya aparece en el inventario.');
+  }
+
+  async function guardarSolicitud(){
+    const tel=$('sTel').value.replace(/\D/g,'');
+    if(!$('sNombre').value.trim())return toast('Falta su nombre.');
+    if(tel.length<10)return toast('El WhatsApp debe tener 10 dígitos.');
+    const needs={};document.querySelectorAll('#pubHost [data-s]').forEach(i=>needs[i.dataset.s]=i.checked);
+    solicitudes.unshift({
+      id:'SO-'+Date.now().toString(36).toUpperCase().slice(-6),
+      nombre:$('sNombre').value.trim(), tel,
+      adultos:+$('sAdultos').value||1, ninos:+$('sNinos').value||0, mayores:+$('sMayores').value||0,
+      urg:$('sUrg').value, censo:$('sCenso').value,
+      mun:$('sMun').value, depto:DEPTO_DE[$('sMun').value]||'', zona:$('sZona').value, tipo:$('sTipo').value,
+      hab:+$('sHab').value||1, tope:Math.max(0,parseInt($('sTope').value||'0',10)),
+      nota:$('sNota').value.trim(), needs, reportes:0, demo:false, fecha:Date.now()
+    });
+    await saveSol(); mountForm(); tab='dem'; render();
+    toast('Su solicitud quedó publicada. La pueden contactar en cualquier momento.');
+  }
+
+  /* ---------- listados ---------- */
+  const vis=()=>inmuebles.filter(l=>l.reportes<2);
+  function filtrados(){
+    let out=vis().filter(l=>{
+      if(F.depto&&(l.depto||DEPTO_DE[l.mun])!==F.depto)return false;
+      if(F.mun&&l.mun!==F.mun)return false;
+      if(F.zona&&l.zona!==F.zona)return false;
+      if(F.tipo&&l.tipo!==F.tipo)return false;
+      if(F.precio&&l.canon>+F.precio)return false;
+      if(F.hab&&l.hab<+F.hab)return false;
+      for(const f of F.flags)if(!l.flags[f])return false;
+      return true;
+    });
+    if(F.orden==='baratos')out.sort((a,b)=>a.canon-b.canon);
+    else if(F.orden==='grandes')out.sort((a,b)=>b.hab-a.hab);
+    else out.sort((a,b)=>b.fecha-a.fecha);
+    return out;
+  }
+  const coinciden=s=>vis().filter(l=>l.mun===s.mun&&l.hab>=s.hab&&(s.tope===0||l.canon<=s.tope)
+    &&(!s.needs.sinFiador||l.flags.sinFiador)&&(!s.needs.mascotas||l.flags.mascotas)
+    &&(!s.needs.accesible||l.flags.accesible)&&(!s.needs.amoblado||l.flags.amoblado)).length;
+
+  const ORDEN=['gratuito','sinFiador','sinDeposito','subsidio','inmediata','revisado','amoblado','mascotas','accesible'];
+  const KEYSET=new Set(['gratuito','sinFiador','sinDeposito','subsidio']), OKSET=new Set(['revisado','inmediata']);
+  const badgesOf=l=>ORDEN.filter(k=>l.flags[k]).map(k=>{
+    const f=FLAGS.find(x=>x.k===k);
+    return `<span class="badge ${KEYSET.has(k)?'key':OKSET.has(k)?'ok':''}">${f.l}</span>`;}).join('');
+
+  function cardInmueble(l){
+    const wa=`https://wa.me/57${l.tel}?text=${encodeURIComponent('Hola, escribo por el inmueble '+l.id+' de hogarsolidario.co ('+l.tipo+' en '+l.barrio+', '+l.mun+'). ¿Sigue disponible?')}`;
+    return `<article class="card">
+      <div><div class="code">${esc(l.id)} · ${l.disp==='Inmediata'?'DISPONIBLE HOY':'DISPONIBLE EN '+esc(l.disp).toUpperCase()}</div>
+        <h3>${esc(l.tipo)} en ${esc(l.barrio)}</h3>
+        <div class="loc">${esc(l.mun)}, ${esc(l.depto||DEPTO_DE[l.mun]||'')} · ${esc(l.zona)} · mínimo ${esc(l.dur)}</div></div>
+      <div class="price ${l.canon===0?'free':''}">${cop(l.canon)}${l.canon>0?' <small>/ mes</small>':''}</div>
+      <div class="specs"><span><b>${l.hab}</b> hab.</span><span><b>${l.banos}</b> baños</span>${l.area?`<span><b>${l.area}</b> m²</span>`:''}</div>
+      ${l.notas?`<p class="txt">${esc(l.notas)}</p>`:''}
+      <div class="badges">${badgesOf(l)}${l.demo?'<span class="badge demo">EJEMPLO</span>':''}</div>
+      <div class="who"><span class="tick">✓</span> ${esc(l.quien)} · ${l.rol==='inmobiliaria'?'Inmobiliaria':'Propietario'} solidario</div>
+      <div class="cardfoot">
+        <a class="btn sm" href="${wa}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+        ${l.fotos?`<a class="btn sm ghost" href="${esc(l.fotos)}" target="_blank" rel="noopener">Fotos</a>`:''}
+        <button class="report" data-rep="${l.id}">Reportar</button></div>
+    </article>`;
+  }
+
+  function cardSolicitud(s){
+    const n=s.adultos+s.ninos+s.mayores, m=coinciden(s);
+    const wa=`https://wa.me/57${s.tel}?text=${encodeURIComponent('Hola '+s.nombre+', vi su solicitud '+s.id+' en hogarsolidario.co. Tengo un inmueble disponible en '+s.mun+' que puede servirle.')}`;
+    const chips=NEEDS.filter(x=>s.needs[x.k]).map(x=>`<span class="badge key">${x.l}</span>`).join('');
+    return `<article class="card">
+      <div><div class="code">${esc(s.id)} · ${esc(s.urg).toUpperCase()}</div>
+        <h3>Familia de ${n} ${n===1?'persona':'personas'}</h3>
+        <div class="loc">Busca en ${esc(s.mun)}, ${esc(s.depto||DEPTO_DE[s.mun]||'')}${s.zona?' · '+esc(s.zona):''} · ${esc(s.tipo).toLowerCase()}</div></div>
+      <div class="price">${s.tope>0?cop(s.tope):'Sin definir'} ${s.tope>0?'<small>máximo / mes</small>':''}</div>
+      <div class="specs"><span><b>${s.adultos}</b> adultos</span>${s.ninos?`<span><b>${s.ninos}</b> niños</span>`:''}${s.mayores?`<span><b>${s.mayores}</b> mayores</span>`:''}<span>desde <b>${s.hab}</b> hab.</span></div>
+      ${s.nota?`<p class="txt">${esc(s.nota)}</p>`:''}
+      <div class="badges">${chips}<span class="badge">Censo: ${esc(s.censo)}</span>${s.demo?'<span class="badge demo">EJEMPLO</span>':''}</div>
+      <div class="match">${m} ${m===1?'inmueble coincide':'inmuebles coinciden'} con lo que pide</div>
+      <div class="cardfoot"><a class="btn sm" href="${wa}" target="_blank" rel="noopener">Ofrecerle un inmueble</a>
+        <button class="report" data-rep="${s.id}">Reportar</button></div>
+    </article>`;
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    $('tk1').innerHTML='<b>'+vis().length+'</b> INMUEBLES';
+    $('tk2').innerHTML='<b>'+solicitudes.length+'</b> FAMILIAS BUSCANDO';
+    if(!rol)return;
+    buildTabs();
+    $('vInv').hidden=tab!=='inv'; $('vDem').hidden=tab!=='dem'; $('vPub').hidden=tab!=='pub';
+
+    if(tab==='inv'){
+      const res=filtrados();
+      $('resInv').textContent=res.length+(res.length===1?' inmueble':' inmuebles');
+      $('gridInv').innerHTML=res.length?res.map(cardInmueble).join(''):`<div class="empty">
+        <h3>${vis().length?'Ningún inmueble cumple estos filtros':'Todavía no hay inmuebles publicados'}</h3>
+        <p>${vis().length?'Quite alguna condición: los filtros de emergencia son los que más reducen los resultados.'
+          :'Las inmobiliarias y propietarios publican desde su propia pestaña. Cargue ejemplos para ver la página llena.'}</p>
+        <button class="btn ghost" id="eA">${vis().length?'Quitar filtros':'Cargar ejemplos de prueba'}</button></div>`;
+      const b=$('eA'); if(b)b.addEventListener('click',vis().length?()=>$('btnLimpiar').click():demo);
+    }
+
+    if(tab==='dem'){
+      $('demNote').innerHTML=rol==='afectado'
+        ? 'Estas son otras familias buscando en las zonas afectadas. Si ya resolvió, avísenos para bajar su solicitud y dejarle el cupo a alguien más.'
+        : '<b>Aquí está la demanda real.</b> Cada tarjeta es una familia que ya dijo qué necesita y cuánto puede pagar. Escríbale directo a quien encaje con su inventario.';
+      const res=solicitudes.filter(s=>!dMun||s.mun===dMun).filter(s=>s.reportes<2);
+      $('resDem').textContent=res.length+(res.length===1?' solicitud':' solicitudes');
+      $('gridDem').innerHTML=res.length?res.map(cardSolicitud).join(''):`<div class="empty">
+        <h3>Aún no hay solicitudes${dMun?' en '+esc(dMun):''}</h3>
+        <p>Cuando una familia publique lo que necesita, aparecerá aquí con su presupuesto y su contacto.</p></div>`;
+    }
+
+    if(tab==='pub'&&!$('pubHost').dataset.for){ }
+    if(tab==='pub'&&$('pubHost').dataset.for!==rol){ mountForm(); $('pubHost').dataset.for=rol; }
+  }
+
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-rep]'); if(!b)return;
+    const id=b.dataset.rep;
+    const arr=id.startsWith('SO-')?solicitudes:inmuebles;
+    const it=arr.find(x=>x.id===id); if(!it)return;
+    it.reportes=(it.reportes||0)+1;
+    await (id.startsWith('SO-')?saveSol():saveInm()); render();
+    toast(it.reportes>=2?'Publicación retirada para revisión.':'Reporte registrado. Gracias.');
+  });
+
+  /* ---------- ejemplos ---------- */
+  async function demo(){
+    const I=[
+      ['Apartamento','Manizales','Centro','Palermo',850000,3,2,74,'Inmediata','3 meses','Tercer piso, agua y luz activas. Fuera del área con restricción.',{sinFiador:1,subsidio:1,inmediata:1,revisado:1,amoblado:1},'Arrendamientos La Cordillera','3104556677','inmobiliaria'],
+      ['Casa','Pereira','Occidente','Cuba',1150000,4,2,118,'3 días','6 meses','Patio y garaje, a dos cuadras del colegio.',{sinFiador:1,sinDeposito:1,subsidio:1,revisado:1,mascotas:1},'Inmobiliaria Otún','3129988776','inmobiliaria'],
+      ['Aparta-estudio','Armenia','Norte','La Castilla',560000,1,1,34,'Inmediata','1 mes','Para pareja o persona sola, administración incluida.',{sinFiador:1,inmediata:1,revisado:1},'Gloria Restrepo','3157744221','propietario'],
+      ['Casa-finca','Santa Rosa de Cabal','Zona rural','Vereda El Español',0,5,2,160,'Inmediata','3 meses','Cedida sin costo mientras dure la emergencia. Cabe más de una familia.',{gratuito:1,sinFiador:1,sinDeposito:1,inmediata:1,revisado:1,amoblado:1},'Familia Ocampo Ruiz','3018899001','propietario'],
+      ['Apartamento','Cartago','Centro','Santa Ana',640000,2,1,55,'1 semana','12 meses','Conjunto cerrado con portería, primer piso sin escaleras.',{subsidio:1,revisado:1,accesible:1},'Inmobiliaria Cañaveral','3143322110','inmobiliaria'],
+      ['Casa','Roldanillo','Centro','El Jardín',520000,3,1,88,'Inmediata','3 meses','Casa amplia con solar, zona sin afectación.',{sinFiador:1,sinDeposito:1,inmediata:1,revisado:1},'Arriendos Norte del Valle','3167788990','inmobiliaria'],
+      ['Apartamento','Cali','Sur','El Ingenio',950000,3,2,78,'Inmediata','3 meses','Quinto piso con ascensor, cocina integral.',{sinFiador:1,subsidio:1,inmediata:1,revisado:1},'Arrendamientos del Pacífico','3104556677','inmobiliaria'],
+      ['Casa','Dosquebradas','Centro','Los Naranjos',700000,3,2,90,'3 días','6 meses','Unidad con zona verde y parqueadero.',{sinFiador:1,subsidio:1,revisado:1,mascotas:1},'Inmobiliaria Otún','3129988776','inmobiliaria'],
+      ['Habitación','Quibdó','Centro','El Silencio',300000,1,1,18,'Inmediata','1 mes','Baño compartido, servicios incluidos.',{sinFiador:1,sinDeposito:1,inmediata:1,amoblado:1},'Atrato Hospedajes','3112255338','propietario'],
+      ['Apartamento','Villamaría','Centro','La Floresta',600000,2,1,52,'Inmediata','3 meses','Segundo piso, a diez minutos de Manizales.',{sinDeposito:1,subsidio:1,inmediata:1,revisado:1},'Arrendamientos La Cordillera','3104556677','inmobiliaria'],
+      ['Casa','Calarcá','Centro','La Virginia',680000,3,2,86,'1 semana','6 meses','Con patio de ropas y antejardín.',{sinFiador:1,subsidio:1,revisado:1},'Quindío Propiedad Raíz','3145566778','inmobiliaria'],
+      ['Apartamento','Palmira','Centro','Zamorano',780000,2,2,62,'Inmediata','12 meses','Edificio de cuatro pisos, sin daños tras revisión.',{subsidio:1,revisado:1,inmediata:1},'Inmobiliaria Valle Verde','3129911774','inmobiliaria']
+    ].map((r,i)=>({id:'RF-DEMO'+(i+1),rol:r[14],quien:r[12],doc:'900.000.0'+(i<10?'0'+i:i)+'-1',tel:r[13],fotos:'',
+      tipo:r[0],mun:r[1],depto:DEPTO_DE[r[1]],zona:r[2],barrio:r[3],canon:r[4],hab:r[5],banos:r[6],area:r[7],
+      disp:r[8],dur:r[9],notas:r[10],flags:r[11],reportes:0,demo:true,fecha:Date.now()-i*3600000}));
+
+    const S=[
+      ['Marisol Aguirre','3125566778',2,3,1,'Estamos en un albergue','Sí','Manizales','Centro','Casa',3,900000,'Los niños estudian cerca al barrio, necesitamos quedarnos en la zona.',{sinFiador:1,subsidio:1,inmediata:1}],
+      ['Jhon Fredy Caicedo','3186677889',2,1,0,'Estamos donde familiares','En trámite','Pereira','Occidente','Apartamento',2,700000,'Trabajo en el centro, cualquier barrio sirve si hay ruta de bus.',{sinFiador:1,subsidio:1}],
+      ['Luz Dary Mosquera','3143399002',1,2,1,'Vivienda con daños, aún adentro','Sí','Quibdó','Centro','Apartamento',2,600000,'Mi mamá usa caminador, no podemos subir escaleras.',{sinFiador:1,accesible:1,amoblado:1}],
+      ['Andrés Villegas','3009911223',2,0,0,'Arriendo terminado por el sismo','No','Armenia','Norte','Aparta-estudio',1,550000,'Somos dos y tenemos un perro pequeño.',{mascotas:1,sinFiador:1}],
+      ['Nubia Cardona','3172233445',3,2,0,'Estamos en un albergue','Sí','Cartago','Centro','Casa',3,750000,'Salimos de Cartago centro, aceptamos cualquier barrio del municipio.',{sinFiador:1,subsidio:1,inmediata:1}],
+      ['Wilmar Peña','3005544332',2,2,1,'Estamos donde familiares','En trámite','Cali','Sur','Apartamento',3,950000,'Nos tocó salir de Dosquebradas, tenemos familia en Cali.',{sinFiador:1,subsidio:1,amoblado:1}]
+    ].map((r,i)=>({id:'SO-DEMO'+(i+1),nombre:r[0],tel:r[1],adultos:r[2],ninos:r[3],mayores:r[4],urg:r[5],censo:r[6],
+      mun:r[7],depto:DEPTO_DE[r[7]],zona:r[8],tipo:r[9],hab:r[10],tope:r[11],nota:r[12],needs:r[13],
+      reportes:0,demo:true,fecha:Date.now()-i*5400000}));
+
+    inmuebles=[...I,...inmuebles.filter(x=>!x.demo)];
+    solicitudes=[...S,...solicitudes.filter(x=>!x.demo)];
+    await saveInm(); await saveSol(); render();
+    toast('Ejemplos cargados. Bórrelos antes de usarla de verdad.');
+  }
+  $('btnDemo').addEventListener('click',demo);
+  $('btnReset').addEventListener('click',async()=>{
+    inmuebles=[];solicitudes=[];await saveInm();await saveSol();render();toast('Se borró todo el contenido.');});
+
+  load();
+})();
+</script>
