@@ -34,7 +34,9 @@ export function PublicarInmueble() {
 
   const [gratuito, setGratuito] = useState(false);
   const [canon, setCanon] = useState<string>('');
-  const [duracion, setDuracion] = useState<string>('3 meses');
+  // Default 12 meses: refleja el contrato de arriendo estándar en Colombia y
+  // aplica también a los imports de Domus (que no envían este campo).
+  const [duracion, setDuracion] = useState<string>('12 meses');
   const [habitaciones, setHabitaciones] = useState<string>('2');
   const [banos, setBanos] = useState<string>('1');
   const [area, setArea] = useState<string>('');
@@ -162,18 +164,9 @@ export function PublicarInmueble() {
         }
         return;
       }
-      // Canon alto → pedir confirmación explícita.
-      if (resp.data.precio > 2_500_000) {
-        const ok = window.confirm(
-          `El canon detectado es $${resp.data.precio.toLocaleString('es-CO')} / mes. ` +
-            `Esta plataforma es para familias damnificadas — probablemente no sirve. ` +
-            `¿Continuar de todos modos?`,
-        );
-        if (!ok) {
-          setImporting(false);
-          return;
-        }
-      }
+      // No bloqueamos por canon alto. El warning ya lo devuelve el edge function
+      // en resp.warnings y se muestra en pantalla al asesor. La anti-especulación
+      // (mediana de comparables + 30%) sigue viva en el trigger de Postgres.
       populateFromDomus(resp);
       toast('Ficha importada. Revisá y completá lo pendiente.');
     } catch (err) {

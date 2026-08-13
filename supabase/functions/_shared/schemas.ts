@@ -30,7 +30,7 @@ export const inmuebleInputSchema = z.object({
   canon: z.number().int().nonnegative(),
   habitaciones: z.number().int().nonnegative().max(30),
   banos: z.number().int().nonnegative().max(20),
-  area_m2: z.number().int().positive().max(10000).optional(),
+  area_m2: z.number().int().optional(),
   disponible_desde: z.string().max(40).optional(),
   duracion_minima: z.string().max(40).optional(),
   notas: z.string().max(400).optional(),

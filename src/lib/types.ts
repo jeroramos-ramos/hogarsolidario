@@ -65,5 +65,7 @@ export const FILTROS_INICIALES: FiltrosInmuebles = {
   habitacionesMin: null,
   flags: new Set(),
   soloRevisadosIngenieria: false,
-  orden: 'recientes',
+  // El público son familias que perdieron su vivienda: lo asequible primero
+  // sin que nadie tenga que tocar un filtro.
+  orden: 'baratos',
 };
