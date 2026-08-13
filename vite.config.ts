@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
@@ -28,15 +28,42 @@ function preloadDisplayFonts(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), preloadDisplayFonts()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+// Imprime en el log del build si las env vars críticas llegaron o no.
+// Aparece en el output de `vite build` (local) y en el "Build logs" de Vercel.
+// Sirve para diagnosticar deploys donde el bundle sale con URL vacía.
+function envDiagnostic(env: Record<string, string>): Plugin {
+  return {
+    name: 'env-diagnostic',
+    apply: 'build',
+    buildStart() {
+      const line = (name: string, val: string | undefined): string => {
+        if (!val) return `[env-diag] ${name}: MISSING ← el bundle saldrá roto`;
+        const preview = val.length > 40 ? `${val.slice(0, 30)}…(${val.length}c)` : val;
+        return `[env-diag] ${name}: ${preview}`;
+      };
+      // eslint-disable-next-line no-console
+      console.log(line('VITE_SUPABASE_URL', env.VITE_SUPABASE_URL));
+      // eslint-disable-next-line no-console
+      console.log(line('VITE_SUPABASE_ANON_KEY', env.VITE_SUPABASE_ANON_KEY));
     },
-  },
-  server: {
-    port: 5173,
-    host: true,
-  },
+  };
+}
+
+export default defineConfig(({ mode }) => {
+  // loadEnv lee .env, .env.local, .env.[mode], .env.[mode].local Y process.env.
+  // El tercer arg '' significa "sin filtro de prefijo": expone también las system
+  // vars que Vercel/CI inyecten al proceso de build.
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
+    plugins: [react(), preloadDisplayFonts(), envDiagnostic(env)],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
+    server: {
+      port: 5173,
+      host: true,
+    },
+  };
 });

@@ -117,10 +117,31 @@ En Supabase Auth → SMTP Settings: usar Resend con `acceso@hogarsolidario.co` c
 ## Deploy en Vercel
 
 1. Conectar el repo desde el dashboard de Vercel.
-2. Framework preset: **Vite**. Build command: `pnpm build`. Output: `dist`.
-3. Env vars: copiar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` al Production environment.
+2. La configuración está en [`vercel.json`](vercel.json) — framework `vite`, install con pnpm, SPA rewrites, HSTS, cache-control immutable para assets. No debería requerir tocar nada en el dashboard.
+3. Env vars: copiar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` a Production **y** Preview.
 4. Dominios: agregar `hogarsolidario.co` (apex) como principal, con `www.hogarsolidario.co` → 301 al apex.
-5. HTTPS: forzado. HSTS activado en `vercel.json`.
+
+### Diagnóstico si la página sale en blanco / pide config
+
+Las vars `VITE_*` se bakean en el bundle al momento de `vite build` — no se leen en runtime. Si el sitio muestra "El sitio no está configurado correctamente", significa que las variables no llegaron al proceso de build.
+
+Chequeos en orden:
+
+1. **Mirá el build log de Vercel** buscando la línea `[env-diag]`. Debería decir:
+   ```
+   [env-diag] VITE_SUPABASE_URL: https://xxxxxxxx.supabase.co
+   [env-diag] VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR…(208c)
+   ```
+   Si dice `MISSING`, la var **no está** en el entorno de build.
+
+2. **Vercel → Project → Settings → Environment Variables**:
+   - Confirmá que existen `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (nombres exactos, incluido el prefijo `VITE_`).
+   - Confirmá que están tildadas para **Production Y Preview** (Development es opcional).
+   - Que los valores no traigan comillas ni espacios al inicio/final.
+
+3. **Redeploy con "Use existing Build Cache" desmarcado**. Si el bundle viejo no incluye las vars, cambiar env vars sin invalidar cache no ayuda.
+
+4. Si acabás de agregar `vercel.json`, un redeploy fuerza a Vercel a re-detectar el framework y usar la config nueva.
 
 ## Estructura
 
