@@ -1,12 +1,233 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { AppHeader } from '@/components/AppHeader';
+import { Ticker } from '@/components/Ticker';
+import { Badge } from '@/components/Badge';
+import { useInmueble } from '@/hooks/useInmuebles';
+import { cop, shortId } from '@/lib/format';
+import {
+  BADGE_ORDEN,
+  BADGE_KEY_SET,
+  BADGE_OK_SET,
+  FLAGS,
+  type FlagKey,
+} from '@/data/flags';
+
+const FLAG_LABEL: Record<FlagKey, string> = Object.fromEntries(
+  FLAGS.map((f) => [f.k, f.l]),
+) as Record<FlagKey, string>;
 
 export function InmuebleDetalle() {
   const { id } = useParams();
+  const { data: inm, isLoading, error } = useInmueble(id);
+
+  if (isLoading) {
+    return (
+      <>
+        <Ticker inmuebles={0} familias={0} />
+        <AppHeader />
+        <div className="wrap py-10">
+          <div className="animate-pulse h-[400px] bg-surface border border-line-soft rounded" />
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Ticker inmuebles={0} familias={0} />
+        <AppHeader />
+        <div className="wrap py-10">
+          <div className="bg-alert-soft border border-alert-line text-alert p-4 rounded">
+            Error: {(error as Error).message}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (!inm) {
+    return (
+      <>
+        <Ticker inmuebles={0} familias={0} />
+        <AppHeader />
+        <div className="wrap py-10">
+          <p className="eyebrow">No encontrado</p>
+          <h1 className="text-[28px] font-display font-bold">Este aviso ya no está disponible</h1>
+          <p className="text-muted mt-2">
+            Puede haber sido retirado por el publicante, marcado como arrendado o pasado a revisión.
+          </p>
+          <Link
+            to="/inmuebles"
+            className="inline-block mt-6 font-display font-semibold text-[13.5px] px-4 py-[10px] rounded border border-ink bg-ink text-white hover:bg-ink-2 no-underline"
+          >
+            Volver al buscador
+          </Link>
+        </div>
+      </>
+    );
+  }
+
+  const badges = BADGE_ORDEN.filter((k) => inm.flags[k]);
+  const necesitaRevisar = inm.estado_estructural === 'sin_revisar';
+  const propietarioSinVerificar = inm.publicado_por === 'propietario';
+
+  const wa = `https://wa.me/57${inm.telefono}?text=${encodeURIComponent(
+    `Hola, escribo por el inmueble ${shortId(inm.id)} de hogarsolidario.co (${inm.tipo} en ${inm.barrio}, ${inm.municipio}). ¿Sigue disponible?`,
+  )}`;
+
   return (
-    <div className="wrap py-10">
-      <p className="eyebrow">Ficha del inmueble</p>
-      <h1 className="text-2xl">Inmueble {id}</h1>
-      <p className="text-muted mt-2 text-sm">Fase 3 — galería y WhatsApp.</p>
-    </div>
+    <>
+      <Ticker inmuebles={0} familias={0} />
+      <AppHeader />
+
+      <div className="wrap py-6 pb-16 max-w-[840px]">
+        <Link
+          to="/inmuebles"
+          className="text-[12px] text-muted underline hover:text-ink no-underline"
+        >
+          ← Volver al buscador
+        </Link>
+
+        <div className="mt-4 font-mono text-[10.5px] text-muted tracking-[0.06em]">
+          {shortId(inm.id)} ·{' '}
+          {inm.disponible_desde === 'Inmediata'
+            ? 'DISPONIBLE HOY'
+            : 'DISPONIBLE ' + String(inm.disponible_desde ?? '').toUpperCase()}
+        </div>
+        <h1 className="text-[28px] font-display font-bold mt-1">
+          {inm.tipo} en {inm.barrio}
+        </h1>
+        <div className="text-[15px] text-muted mt-1">
+          {inm.municipio}, {inm.departamento}
+          {inm.zona ? ' · ' + inm.zona : ''}
+          {inm.duracion_minima ? ' · mínimo ' + inm.duracion_minima : ''}
+        </div>
+
+        {necesitaRevisar && (
+          <div className="mt-5 bg-alert-soft border-l-[3px] border-alert p-[13px] pl-4 rounded-r text-[13px]">
+            <b>Este inmueble no ha sido revisado tras el sismo.</b> El publicante no confirmó
+            si sufrió daños estructurales. Pida al propietario que confirme habitabilidad antes
+            de visitar y de comprometer dinero.
+          </div>
+        )}
+
+        {inm.estado_estructural === 'sin_danos_aparentes' && (
+          <div className="mt-5 bg-paper border-l-[3px] border-line p-[13px] pl-4 rounded-r text-[13px]">
+            <b>Sin daños aparentes.</b> Declaración del propietario, no es un dictamen técnico.
+          </div>
+        )}
+
+        {inm.estado_estructural === 'revisado_ingenieria' && (
+          <div className="mt-5 bg-verify-soft border-l-[3px] border-verify p-[13px] pl-4 rounded-r text-[13px] text-verify-ink">
+            <b>✓ Revisado por ingeniería / gestión del riesgo.</b>
+          </div>
+        )}
+
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-[1fr_320px] gap-6 items-start">
+          <div>
+            {inm.fotos.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {inm.fotos.slice(0, 6).map((path, i) => (
+                  <div
+                    key={path + i}
+                    className="aspect-[4/3] bg-paper border border-line-soft rounded overflow-hidden"
+                  >
+                    <img
+                      src={path}
+                      alt={`Foto ${i + 1} de ${inm.tipo} en ${inm.barrio}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="aspect-[4/3] bg-paper border border-dashed border-line rounded flex items-center justify-center text-muted text-sm">
+                Sin fotos
+              </div>
+            )}
+
+            {inm.notas && (
+              <p className="mt-5 text-[14px] text-ink-2 leading-relaxed">{inm.notas}</p>
+            )}
+
+            {badges.length > 0 && (
+              <div className="mt-5 flex flex-wrap gap-[6px]">
+                {badges.map((k) => {
+                  const tone: 'key' | 'ok' | 'neutral' = BADGE_KEY_SET.has(k)
+                    ? 'key'
+                    : BADGE_OK_SET.has(k)
+                      ? 'ok'
+                      : 'neutral';
+                  return (
+                    <Badge key={k} tone={tone}>
+                      {FLAG_LABEL[k]}
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <aside className="bg-surface border border-line rounded p-5 md:sticky md:top-[14px]">
+            <div className="font-mono text-[24px] font-semibold leading-none">
+              {cop(inm.canon)}
+              {inm.canon > 0 && (
+                <small className="text-[12px] font-normal text-muted"> / mes</small>
+              )}
+            </div>
+
+            <div className="flex gap-[14px] flex-wrap text-[13px] text-ink-2 border-t border-b border-line-soft py-3 mt-4">
+              <span>
+                <b className="font-mono font-semibold">{inm.habitaciones}</b> hab.
+              </span>
+              <span>
+                <b className="font-mono font-semibold">{inm.banos}</b> baños
+              </span>
+              {inm.area_m2 ? (
+                <span>
+                  <b className="font-mono font-semibold">{inm.area_m2}</b> m²
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-4 text-[13px] text-ink-2">
+              <div className="text-[11px] text-muted uppercase tracking-[0.08em] font-mono">
+                Publica
+              </div>
+              <div className="mt-1">
+                <span className="text-verify font-bold">✓</span> {inm.quien_nombre}
+              </div>
+              <div className="text-[12px] text-muted mt-1">
+                {inm.publicado_por === 'inmobiliaria'
+                  ? 'Inmobiliaria solidaria'
+                  : 'Propietario solidario'}
+              </div>
+              {propietarioSinVerificar && (
+                <div className="mt-2">
+                  <Badge tone="neutral">Publicante sin verificar</Badge>
+                </div>
+              )}
+            </div>
+
+            <a
+              href={wa}
+              target="_blank"
+              rel="noopener"
+              className="mt-5 w-full font-display font-semibold text-[14px] px-4 py-3 rounded inline-flex items-center justify-center bg-ink text-white border border-ink hover:bg-ink-2 no-underline"
+            >
+              Escribir por WhatsApp
+            </a>
+
+            <p className="mt-3 text-[11.5px] text-muted leading-snug">
+              Visite el inmueble antes de comprometerse. Nunca consigne a cuentas personales
+              ni pague por "separar" — si le exigen plata antes de mostrarle la vivienda, es
+              una estafa.
+            </p>
+          </aside>
+        </div>
+      </div>
+    </>
   );
 }
