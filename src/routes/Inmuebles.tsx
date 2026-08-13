@@ -5,6 +5,7 @@ import { InmuebleCard } from '@/components/InmuebleCard';
 import { Chip } from '@/components/Chip';
 import { useInmuebles } from '@/hooks/useInmuebles';
 import { aplicarFiltros } from '@/lib/filters';
+import { suggestFilterRemovals, municipiosCercanos } from '@/lib/suggestions';
 import { FILTROS_INICIALES, type FiltrosInmuebles, type OrdenInmuebles } from '@/lib/types';
 import { DEPARTAMENTOS, DEPTOS, ZONAS, TIPOS, type Departamento } from '@/data/municipios';
 import { FLAGS, type FlagKey } from '@/data/flags';
@@ -15,6 +16,23 @@ export function Inmuebles() {
 
   const municipiosDisponibles = f.departamento ? DEPTOS[f.departamento] : null;
   const resultados = useMemo(() => aplicarFiltros(inmuebles, f), [inmuebles, f]);
+  const sugerencias = useMemo(
+    () => (resultados.length === 0 ? suggestFilterRemovals(inmuebles, f, 0) : []),
+    [inmuebles, f, resultados.length],
+  );
+  const cercanos = useMemo(
+    () => (resultados.length === 0 && f.municipio ? municipiosCercanos(inmuebles, f) : []),
+    [inmuebles, f, resultados.length],
+  );
+
+  // Densidad dinámica: con pocos resultados usamos menos columnas para que las
+  // tarjetas se vean llenas en vez de perdidas en huecos.
+  const gridClass =
+    resultados.length <= 2
+      ? 'grid grid-cols-1 gap-4 max-w-[720px]'
+      : resultados.length <= 4
+        ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
+        : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
 
   function limpiar() {
     setF(FILTROS_INICIALES);
@@ -259,31 +277,70 @@ export function Inmuebles() {
           )}
 
           {!isLoading && !error && resultados.length === 0 && (
-            <div className="bg-surface border border-dashed border-line rounded p-11 text-center">
-              <h3 className="text-[19px] mb-2 font-display">
+            <div className="bg-surface border border-dashed border-line rounded p-8 sm:p-10">
+              <h3 className="text-[19px] font-display font-semibold">
                 {inmuebles.length
                   ? 'Ningún inmueble cumple estos filtros'
                   : 'Todavía no hay inmuebles publicados'}
               </h3>
-              <p className="text-muted text-sm max-w-[46ch] mx-auto mb-[18px]">
+              <p className="text-muted text-sm mt-2 max-w-[52ch]">
                 {inmuebles.length
-                  ? 'Quite alguna condición: los filtros de emergencia son los que más reducen los resultados.'
-                  : 'Las inmobiliarias y propietarios publican desde su propia pestaña. Vuelva a intentarlo en unos minutos.'}
+                  ? 'Estos ajustes te pueden ayudar:'
+                  : 'Las inmobiliarias y propietarios están cargando inventario. Volvé a intentarlo en unos minutos.'}
               </p>
+
+              {sugerencias.length > 0 && (
+                <ul className="mt-4 flex flex-col gap-2 max-w-[520px]">
+                  {sugerencias.map((s) => (
+                    <li key={s.filterKey}>
+                      <button
+                        type="button"
+                        onClick={() => setF(s.newFilters)}
+                        className="text-left w-full flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 bg-paper border border-line rounded px-3 py-2 hover:border-ink cursor-pointer"
+                      >
+                        <span className="text-[13.5px] text-ink">{s.label}</span>
+                        <span className="text-[11.5px] font-mono text-muted whitespace-nowrap">
+                          +{s.additional} {s.additional === 1 ? 'inmueble' : 'inmuebles'}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {cercanos.length > 0 && (
+                <div className="mt-6">
+                  <p className="eyebrow">Municipios cercanos con inventario</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {cercanos.map((c) => (
+                      <button
+                        key={c.municipio}
+                        type="button"
+                        onClick={() => setF((s) => ({ ...s, municipio: c.municipio }))}
+                        className="text-[12.5px] font-medium px-3 py-1.5 border border-line rounded-full bg-surface hover:border-ink cursor-pointer flex items-center gap-2"
+                      >
+                        {c.municipio}
+                        <span className="font-mono text-[11px] text-muted">{c.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {inmuebles.length > 0 && (
                 <button
                   type="button"
                   onClick={limpiar}
-                  className="font-display font-semibold text-[13.5px] px-4 py-[10px] rounded border border-ink bg-transparent text-ink hover:bg-paper"
+                  className="mt-6 font-display font-semibold text-[13px] px-4 py-2 rounded border border-line bg-transparent text-muted hover:text-ink hover:border-ink"
                 >
-                  Quitar filtros
+                  Quitar todos los filtros
                 </button>
               )}
             </div>
           )}
 
           {!isLoading && !error && resultados.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[14px]">
+            <div className={gridClass}>
               {resultados.map((inm) => (
                 <InmuebleCard key={inm.id} inm={inm} />
               ))}

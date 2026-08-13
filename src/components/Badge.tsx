@@ -17,7 +17,7 @@ type BadgeProps = {
 export function Badge({ tone = 'neutral', children }: BadgeProps) {
   return (
     <span
-      className={`text-[10.5px] font-semibold px-2 py-1 border rounded-[2px] ${toneClass[tone]}`}
+      className={`text-[10.5px] font-semibold px-2 py-1 border rounded-[2px] tracking-[0.01em] ${toneClass[tone]}`}
     >
       {children}
     </span>

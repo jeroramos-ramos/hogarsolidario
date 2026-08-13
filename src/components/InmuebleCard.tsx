@@ -2,68 +2,80 @@ import { Link } from 'react-router-dom';
 import type { InmueblePublico } from '@/lib/types';
 import { cop, shortId } from '@/lib/format';
 import { Badge } from './Badge';
-import { BADGE_ORDEN, BADGE_KEY_SET, BADGE_OK_SET, FLAGS } from '@/data/flags';
-import type { FlagKey } from '@/data/flags';
+import { FLAGS, type FlagKey } from '@/data/flags';
 
 const FLAG_LABEL: Record<FlagKey, string> = Object.fromEntries(
   FLAGS.map((f) => [f.k, f.l]),
 ) as Record<FlagKey, string>;
 
-function badgesOf(inm: InmueblePublico) {
-  const badges: Array<{ k: FlagKey; tone: 'key' | 'ok' | 'neutral' }> = [];
-  for (const k of BADGE_ORDEN) {
-    if (!inm.flags[k]) continue;
-    if (BADGE_KEY_SET.has(k)) badges.push({ k, tone: 'key' });
-    else if (BADGE_OK_SET.has(k)) badges.push({ k, tone: 'ok' });
-    else badges.push({ k, tone: 'neutral' });
-  }
-  return badges;
-}
+// Chips que quitan barreras (ámbar). Se muestran arriba de todo lo demás.
+const BARRIER_KEYS: readonly FlagKey[] = ['gratuito', 'sinFiador', 'sinDeposito', 'subsidio'];
+// Los demás flags — se muestran en un bloque secundario, más discretos.
+const SECONDARY_KEYS: readonly FlagKey[] = ['inmediata', 'amoblado', 'mascotas', 'accesible'];
 
 export function InmuebleCard({ inm }: { inm: InmueblePublico }) {
-  const badges = badgesOf(inm);
-  const disp = inm.disponible_desde ?? 'Consultar';
-  const dur = inm.duracion_minima ?? '';
+  const barrierChips = BARRIER_KEYS.filter((k) => inm.flags[k]);
+  const secondaryChips = SECONDARY_KEYS.filter((k) => inm.flags[k]);
   const propietarioSinVerificar = inm.publicado_por === 'propietario';
   const necesitaRevisar = inm.estado_estructural === 'sin_revisar';
+  const dispHoy = inm.disponible_desde === 'Inmediata';
 
   return (
     <article
       className={[
-        'bg-surface rounded p-4 flex flex-col gap-[11px]',
-        'border-l border-r border-b border-t border-line',
-        'hover:border-ink hover:-translate-y-[1px]',
-        'transition-transform transition-colors',
+        'bg-surface rounded p-4 sm:p-5 flex flex-col gap-3',
+        'border border-line',
+        'hover:border-ink transition-colors',
       ].join(' ')}
     >
+      {/* pequeña banda superior: código + estado disponibilidad */}
+      <div className="font-mono text-[10.5px] text-muted tracking-[0.06em] flex items-center gap-2 flex-wrap">
+        <span>{shortId(inm.id)}</span>
+        <span aria-hidden="true">·</span>
+        <span className={dispHoy ? 'text-verify-ink font-semibold' : ''}>
+          {dispHoy ? 'DISPONIBLE HOY' : 'DISPONIBLE ' + (inm.disponible_desde ?? '').toUpperCase()}
+        </span>
+      </div>
+
+      {/* PRIMER GOLPE DE VISTA: municipio + canon */}
       <div>
-        <div className="font-mono text-[10.5px] text-muted tracking-[0.06em]">
-          {shortId(inm.id)} · {disp === 'Inmediata' ? 'DISPONIBLE HOY' : 'DISPONIBLE ' + disp.toUpperCase()}
-        </div>
-        <h3 className="text-[16.5px] font-semibold leading-[1.25] font-display mt-1">
+        <h3 className="text-[19px] font-semibold font-display leading-[1.15]">
           <Link to={`/inmuebles/${inm.id}`} className="text-inherit no-underline hover:underline">
-            {inm.tipo} en {inm.barrio}
+            {inm.municipio}
           </Link>
+          {inm.zona ? <span className="text-muted font-normal"> · {inm.zona}</span> : null}
         </h3>
-        <div className="text-[13px] text-muted">
-          {inm.municipio}, {inm.departamento}
-          {inm.zona ? ' · ' + inm.zona : ''}
-          {dur ? ' · mínimo ' + dur : ''}
+        <div
+          className={
+            'mt-1 font-mono text-[24px] sm:text-[26px] font-semibold leading-none' +
+            (inm.canon === 0 ? ' text-verify' : '')
+          }
+        >
+          {cop(inm.canon)}
+          {inm.canon > 0 && (
+            <small className="text-[12px] font-normal text-muted"> / mes</small>
+          )}
         </div>
       </div>
 
-      <div
-        className={
-          'font-mono text-[19px] font-semibold leading-none' +
-          (inm.canon === 0 ? ' text-verify' : '')
-        }
-      >
-        {cop(inm.canon)}
-        {inm.canon > 0 && (
-          <small className="text-[11px] font-normal text-muted"> / mes</small>
-        )}
+      {/* subtítulo: tipo + barrio + duración */}
+      <div className="text-[13px] text-muted">
+        {inm.tipo} en {inm.barrio}
+        {inm.duracion_minima ? ' · mínimo ' + inm.duracion_minima : ''}
       </div>
 
+      {/* CHIPS QUE QUITAN BARRERAS — ámbar, arriba de todo */}
+      {barrierChips.length > 0 && (
+        <div className="flex flex-wrap gap-[5px]">
+          {barrierChips.map((k) => (
+            <Badge key={k} tone="key">
+              {FLAG_LABEL[k]}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      {/* specs numéricos — línea horizontal simple */}
       <div className="flex gap-[14px] flex-wrap text-[12.5px] text-ink-2 border-t border-b border-line-soft py-[9px]">
         <span>
           <b className="font-mono font-semibold">{inm.habitaciones}</b> hab.
@@ -78,30 +90,34 @@ export function InmuebleCard({ inm }: { inm: InmueblePublico }) {
         ) : null}
       </div>
 
-      {inm.notas ? <p className="text-[13px] text-muted m-0">{inm.notas}</p> : null}
+      {inm.notas ? (
+        <p className="text-[13px] text-muted m-0 line-clamp-2">{inm.notas}</p>
+      ) : null}
 
-      <div className="flex flex-wrap gap-[5px]">
-        {badges.map((b) => (
-          <Badge key={b.k} tone={b.tone}>
-            {FLAG_LABEL[b.k]}
-          </Badge>
-        ))}
-        {necesitaRevisar && <Badge tone="warn">Sin revisar tras el sismo</Badge>}
-        {propietarioSinVerificar && (
-          <Badge tone="neutral">Publicante sin verificar</Badge>
-        )}
-      </div>
+      {/* CHIPS SECUNDARIOS + advertencias — font-medium para no competir con el h3 */}
+      {(secondaryChips.length > 0 || necesitaRevisar || propietarioSinVerificar) && (
+        <div className="flex flex-wrap gap-[5px]">
+          {necesitaRevisar && <Badge tone="warn">Sin revisar tras el sismo</Badge>}
+          {propietarioSinVerificar && <Badge tone="neutral">Publicante sin verificar</Badge>}
+          {secondaryChips.map((k) => (
+            <Badge key={k} tone="neutral">
+              {FLAG_LABEL[k]}
+            </Badge>
+          ))}
+        </div>
+      )}
 
+      {/* quién publica — línea sobria */}
       <div className="text-[12px] text-muted flex items-center gap-[6px]">
-        <span className="text-verify font-bold">✓</span> {inm.quien_nombre} ·{' '}
+        <span className="text-verify" aria-hidden="true">✓</span> {inm.quien_nombre} ·{' '}
         {inm.publicado_por === 'inmobiliaria' ? 'Inmobiliaria' : 'Propietario'} solidario
       </div>
 
-      <div className="flex gap-2 items-center mt-auto pt-1">
+      <div className="flex mt-auto pt-1">
         <Link
           to={`/inmuebles/${inm.id}`}
           className={[
-            'font-display font-semibold text-[12px] px-3 py-2 rounded inline-flex items-center justify-center gap-[7px]',
+            'w-full font-display font-semibold text-[13px] px-3 py-2 rounded inline-flex items-center justify-center',
             'bg-ink text-white border border-ink hover:bg-ink-2 no-underline',
             'focus-visible:outline-2 focus-visible:outline-signal focus-visible:outline-offset-2',
           ].join(' ')}

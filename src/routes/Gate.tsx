@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Ticker } from '@/components/Ticker';
+import { StatsBanner } from '@/components/StatsBanner';
+import { useStats } from '@/hooks/useStats';
 
 type RoleKey = 'inmobiliaria' | 'propietario' | 'afectado';
 
@@ -41,10 +43,11 @@ const ROLES: RoleCard[] = [
 
 export function Gate() {
   const navigate = useNavigate();
+  const { data: stats } = useStats();
 
   return (
     <>
-      <Ticker inmuebles={0} familias={0} />
+      <Ticker inmuebles={stats?.total ?? 0} familias={0} />
 
       <section className="wrap pt-14 pb-20">
         <div className="max-w-[60ch]">
@@ -63,7 +66,9 @@ export function Gate() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-[14px] mt-[38px]">
+        <StatsBanner />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-[14px] mt-8">
           {ROLES.map((r) => (
             <button
               key={r.key}
