@@ -26,5 +26,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src", "supabase/functions/import-domus/parser.ts"]
+  "include": ["src", "supabase/functions/import-domus/parser.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }

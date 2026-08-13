@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "composite": false,
+    "types": ["vitest/globals", "node"]
+  },
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src",
+    "supabase/functions/import-domus/parser.ts"
+  ],
+  "exclude": []
+}
