@@ -54,6 +54,24 @@ export async function reportar(input: unknown): Promise<{ ok: true }> {
   return invoke<{ ok: true }>('report', input);
 }
 
+// Fire-and-forget: registra el clic de contacto y deja al ancla nativa abrir WhatsApp.
+// keepalive:true garantiza que la request sobreviva a la navegación de la pestaña.
+export function logContactoInmueble(inmuebleId: string): void {
+  const anon = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  fetch(`${SUPABASE_URL}/functions/v1/contact-inmueble`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${anon}`,
+      apikey: anon,
+    },
+    body: JSON.stringify({ inmueble_id: inmuebleId }),
+    keepalive: true,
+  }).catch(() => {
+    // Silencioso: no bloqueamos el WhatsApp por un fallo de log.
+  });
+}
+
 // ── import Domus ────────────────────────────────────────────────────
 export type DomusImportSuccess = {
   ok: true;

@@ -7,6 +7,7 @@ import { ReportDialog } from '@/components/ReportDialog';
 import { useInmueble } from '@/hooks/useInmuebles';
 import { cop, shortId } from '@/lib/format';
 import { publicUrl } from '@/lib/photos';
+import { logContactoInmueble } from '@/lib/api';
 import {
   BADGE_ORDEN,
   BADGE_KEY_SET,
@@ -219,6 +220,7 @@ export function InmuebleDetalle() {
               href={wa}
               target="_blank"
               rel="noopener"
+              onClick={() => logContactoInmueble(inm.id)}
               className="mt-5 w-full font-display font-semibold text-[14px] px-4 py-3 rounded inline-flex items-center justify-center bg-ink text-white border border-ink hover:bg-ink-2 no-underline"
             >
               Escribir por WhatsApp

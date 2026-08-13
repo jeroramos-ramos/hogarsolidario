@@ -7,14 +7,31 @@ import { useInmuebles } from '@/hooks/useInmuebles';
 import { aplicarFiltros } from '@/lib/filters';
 import { suggestFilterRemovals, municipiosCercanos } from '@/lib/suggestions';
 import { FILTROS_INICIALES, type FiltrosInmuebles, type OrdenInmuebles } from '@/lib/types';
-import { DEPARTAMENTOS, DEPTOS, ZONAS, TIPOS, type Departamento } from '@/data/municipios';
+import type { InmueblePublico } from '@/lib/types';
 import { FLAGS, type FlagKey } from '@/data/flags';
+import type { Zona } from '@/data/municipios';
+
+// Cuenta valores no-nulos en un array; devuelve pares ordenados por frecuencia desc.
+function frecuencias<T extends string>(items: readonly (T | null | undefined)[]): Array<{ value: T; count: number }> {
+  const map = new Map<T, number>();
+  for (const it of items) {
+    if (!it) continue;
+    map.set(it, (map.get(it) ?? 0) + 1);
+  }
+  return Array.from(map.entries())
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+function toneOfBarrier(k: FlagKey): boolean {
+  return k === 'sinFiador' || k === 'sinDeposito' || k === 'subsidio' || k === 'gratuito';
+}
 
 export function Inmuebles() {
   const { data: inmuebles = [], isLoading, error } = useInmuebles();
   const [f, setF] = useState<FiltrosInmuebles>(FILTROS_INICIALES);
+  const [openCondiciones, setOpenCondiciones] = useState(false);
 
-  const municipiosDisponibles = f.departamento ? DEPTOS[f.departamento] : null;
   const resultados = useMemo(() => aplicarFiltros(inmuebles, f), [inmuebles, f]);
   const sugerencias = useMemo(
     () => (resultados.length === 0 ? suggestFilterRemovals(inmuebles, f, 0) : []),
@@ -25,20 +42,28 @@ export function Inmuebles() {
     [inmuebles, f, resultados.length],
   );
 
-  // Densidad dinámica: con pocos resultados usamos menos columnas para que las
-  // tarjetas se vean llenas en vez de perdidas en huecos.
-  const gridClass =
-    resultados.length <= 2
-      ? 'grid grid-cols-1 gap-4 max-w-[720px]'
-      : resultados.length <= 4
-        ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
-        : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+  // Municipios y zonas se derivan del inventario visible con los OTROS filtros aplicados
+  // (excluyendo el propio filtro). Así no colapsamos la lista cuando ya hay uno activo.
+  const municipiosDisponibles = useMemo(() => {
+    const sinMun: FiltrosInmuebles = { ...f, municipio: '' };
+    const base = aplicarFiltros(inmuebles, sinMun);
+    return frecuencias<string>(base.map((i) => i.municipio));
+  }, [inmuebles, f]);
 
-  function limpiar() {
+  const zonasDisponibles = useMemo(() => {
+    const sinZona: FiltrosInmuebles = { ...f, zona: '' };
+    const base = aplicarFiltros(inmuebles, sinZona);
+    return frecuencias<Zona>(base.map((i: InmueblePublico) => i.zona));
+  }, [inmuebles, f]);
+
+  const activeCondCount =
+    f.flags.size + (f.soloRevisadosIngenieria ? 1 : 0);
+
+  function limpiar(): void {
     setF(FILTROS_INICIALES);
   }
 
-  function toggleFlag(k: FlagKey) {
+  function toggleFlag(k: FlagKey): void {
     setF((s) => {
       const flags = new Set(s.flags);
       if (flags.has(k)) flags.delete(k);
@@ -52,213 +77,104 @@ export function Inmuebles() {
       <Ticker inmuebles={inmuebles.length} familias={0} />
       <AppHeader />
 
-      <div className="wrap grid grid-cols-1 md:grid-cols-[262px_1fr] gap-[26px] py-6 pb-16 items-start">
-        <aside className="bg-surface border border-line rounded p-[18px] md:sticky md:top-[14px]">
-          <p className="eyebrow">Filtros</p>
+      <div className="wrap py-6 pb-16">
+        {/* ─── Título + contador ─── */}
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <h1 className="text-[24px] sm:text-[28px] font-display font-bold">
+            Inmuebles disponibles
+          </h1>
+          <span className="font-mono text-[13px] text-muted whitespace-nowrap">
+            {isLoading
+              ? 'Cargando…'
+              : `${resultados.length} ${resultados.length === 1 ? 'aviso' : 'avisos'}`}
+          </span>
+        </div>
 
-          <div className="mb-[15px]">
-            <label className="block text-[12px] font-semibold mb-[5px]" htmlFor="fDepto">
-              Departamento
-            </label>
-            <select
-              id="fDepto"
-              value={f.departamento}
-              onChange={(e) => {
-                const dep = e.target.value as Departamento | '';
-                setF((s) => ({ ...s, departamento: dep, municipio: '' }));
-              }}
-              className="w-full text-[13.5px] px-[10px] py-[9px] border border-line rounded bg-surface"
+        {/* ─── Filtros como chips horizontales ─── */}
+        <div className="mt-5 flex flex-col gap-2">
+          {/* Municipios */}
+          <ChipRow
+            label="Municipio"
+            active={f.municipio || null}
+            onSelect={(v) => setF((s) => ({ ...s, municipio: v ?? '' }))}
+            options={municipiosDisponibles}
+          />
+
+          {/* Zonas */}
+          <ChipRow
+            label="Zona"
+            active={f.zona || null}
+            onSelect={(v) => setF((s) => ({ ...s, zona: (v as Zona | null) ?? '' }))}
+            options={zonasDisponibles}
+          />
+
+          {/* Condiciones (colapsable) */}
+          <div className="border border-line rounded">
+            <button
+              type="button"
+              onClick={() => setOpenCondiciones((v) => !v)}
+              className="w-full flex items-center justify-between px-3 py-2 text-[12.5px] font-semibold cursor-pointer bg-transparent border-none text-inherit font-body focus-visible:outline-2 focus-visible:outline-signal focus-visible:outline-offset-[-2px]"
+              aria-expanded={openCondiciones}
             >
-              <option value="">Todos</option>
-              {DEPARTAMENTOS.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-[15px]">
-            <label className="block text-[12px] font-semibold mb-[5px]" htmlFor="fMun">
-              Municipio
-            </label>
-            <select
-              id="fMun"
-              value={f.municipio}
-              onChange={(e) => setF((s) => ({ ...s, municipio: e.target.value }))}
-              className="w-full text-[13.5px] px-[10px] py-[9px] border border-line rounded bg-surface"
-            >
-              <option value="">Todos</option>
-              {municipiosDisponibles
-                ? municipiosDisponibles.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))
-                : DEPARTAMENTOS.map((d) => (
-                    <optgroup key={d} label={d}>
-                      {DEPTOS[d].map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-            </select>
-          </div>
-
-          <div className="mb-[15px]">
-            <label className="block text-[12px] font-semibold mb-[5px]" htmlFor="fZona">
-              Zona
-            </label>
-            <select
-              id="fZona"
-              value={f.zona}
-              onChange={(e) =>
-                setF((s) => ({ ...s, zona: (e.target.value as FiltrosInmuebles['zona']) }))
-              }
-              className="w-full text-[13.5px] px-[10px] py-[9px] border border-line rounded bg-surface"
-            >
-              <option value="">Todas</option>
-              {ZONAS.map((z) => (
-                <option key={z} value={z}>
-                  {z}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-[15px]">
-            <label className="block text-[12px] font-semibold mb-[5px]" htmlFor="fTipo">
-              Tipo
-            </label>
-            <select
-              id="fTipo"
-              value={f.tipo}
-              onChange={(e) =>
-                setF((s) => ({ ...s, tipo: (e.target.value as FiltrosInmuebles['tipo']) }))
-              }
-              className="w-full text-[13.5px] px-[10px] py-[9px] border border-line rounded bg-surface"
-            >
-              <option value="">Todos</option>
-              {TIPOS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-[15px]">
-            <label className="block text-[12px] font-semibold mb-[5px]" htmlFor="fPrecio">
-              Canon máximo (COP/mes)
-            </label>
-            <input
-              id="fPrecio"
-              type="number"
-              min={0}
-              step={50000}
-              placeholder="Sin límite"
-              value={f.canonMax ?? ''}
-              onChange={(e) =>
-                setF((s) => ({
-                  ...s,
-                  canonMax: e.target.value ? Math.max(0, parseInt(e.target.value, 10)) : null,
-                }))
-              }
-              className="w-full text-[13.5px] px-[10px] py-[9px] border border-line rounded bg-surface"
-            />
-          </div>
-
-          <div className="mb-[15px]">
-            <label className="block text-[12px] font-semibold mb-[5px]" htmlFor="fHab">
-              Habitaciones mínimas
-            </label>
-            <select
-              id="fHab"
-              value={f.habitacionesMin?.toString() ?? ''}
-              onChange={(e) =>
-                setF((s) => ({
-                  ...s,
-                  habitacionesMin: e.target.value ? parseInt(e.target.value, 10) : null,
-                }))
-              }
-              className="w-full text-[13.5px] px-[10px] py-[9px] border border-line rounded bg-surface"
-            >
-              <option value="">Cualquiera</option>
-              <option value="1">1+</option>
-              <option value="2">2+</option>
-              <option value="3">3+</option>
-              <option value="4">4+</option>
-            </select>
-          </div>
-
-          <div className="mb-[15px]">
-            <label className="flex items-start gap-[9px] text-[13px] cursor-pointer border border-line-soft rounded p-[10px] hover:border-line">
-              <input
-                type="checkbox"
-                className="mt-[2px] accent-ink flex-none"
-                checked={f.soloRevisadosIngenieria}
-                onChange={(e) =>
-                  setF((s) => ({ ...s, soloRevisadosIngenieria: e.target.checked }))
-                }
-              />
               <span>
-                Solo revisados por ingeniería
-                <span className="block text-[11.5px] text-muted mt-[2px]">
-                  Excluye "sin daños aparentes" y "sin revisar".
-                </span>
+                Condiciones
+                {activeCondCount > 0 && (
+                  <span className="ml-2 font-mono text-[11px] text-signal-ink bg-signal-soft border border-signal-line px-1.5 py-0.5 rounded">
+                    {activeCondCount}
+                  </span>
+                )}
               </span>
-            </label>
+              <span aria-hidden="true" className="text-muted">
+                {openCondiciones ? '−' : '+'}
+              </span>
+            </button>
+            {openCondiciones && (
+              <div className="px-3 pb-3 pt-1 border-t border-line-soft flex flex-wrap gap-[6px]">
+                {FLAGS.map((flg) => (
+                  <Chip
+                    key={flg.k}
+                    on={f.flags.has(flg.k)}
+                    onClick={() => toggleFlag(flg.k)}
+                    className={toneOfBarrier(flg.k) && !f.flags.has(flg.k) ? 'border-signal-line' : ''}
+                  >
+                    {flg.l}
+                  </Chip>
+                ))}
+                <label className="flex items-center gap-2 text-[12px] font-medium border border-line rounded-full px-[11px] py-[7px] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={f.soloRevisadosIngenieria}
+                    onChange={(e) =>
+                      setF((s) => ({ ...s, soloRevisadosIngenieria: e.target.checked }))
+                    }
+                    className="accent-ink"
+                  />
+                  Solo revisados por ingeniería
+                </label>
+              </div>
+            )}
           </div>
+        </div>
 
-          <div className="mb-[15px]">
-            <p className="eyebrow mb-2">Condiciones</p>
-            <div className="flex flex-wrap gap-[6px]">
-              {FLAGS.map((flg) => (
-                <Chip
-                  key={flg.k}
-                  on={f.flags.has(flg.k)}
-                  onClick={() => toggleFlag(flg.k)}
-                >
-                  {flg.l}
-                </Chip>
-              ))}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={limpiar}
-            className="bg-transparent border-none p-0 text-muted text-[12px] underline cursor-pointer hover:text-ink"
+        {/* ─── Ordenar ─── */}
+        <div className="mt-4 flex items-center gap-2 text-[12px]">
+          <label htmlFor="fOrden" className="text-muted font-semibold">
+            Ordenar
+          </label>
+          <select
+            id="fOrden"
+            value={f.orden}
+            onChange={(e) => setF((s) => ({ ...s, orden: e.target.value as OrdenInmuebles }))}
+            className="text-[13px] px-2 py-1 border border-line rounded bg-surface font-body"
           >
-            Quitar todos los filtros
-          </button>
-        </aside>
+            <option value="recientes">Más recientes</option>
+            <option value="baratos">Canon más bajo</option>
+            <option value="grandes">Más habitaciones</option>
+          </select>
+        </div>
 
-        <section>
-          <div className="flex justify-between items-baseline gap-3 mb-[14px] flex-wrap">
-            <span className="font-mono text-[13px]">
-              {isLoading
-                ? 'Cargando…'
-                : `${resultados.length} ${resultados.length === 1 ? 'inmueble' : 'inmuebles'}`}
-            </span>
-            <label className="text-[12px] font-semibold flex gap-2 items-center font-normal">
-              Ordenar
-              <select
-                value={f.orden}
-                onChange={(e) =>
-                  setF((s) => ({ ...s, orden: e.target.value as OrdenInmuebles }))
-                }
-                className="text-[13.5px] px-[10px] py-[9px] border border-line rounded bg-surface"
-              >
-                <option value="recientes">Más recientes</option>
-                <option value="baratos">Canon más bajo</option>
-                <option value="grandes">Más habitaciones</option>
-              </select>
-            </label>
-          </div>
-
+        {/* ─── Resultados ─── */}
+        <div className="mt-5">
           {error && (
             <div className="bg-alert-soft border border-alert-line text-alert p-4 rounded">
               Error cargando inmuebles: {(error as Error).message}
@@ -266,11 +182,11 @@ export function Inmuebles() {
           )}
 
           {isLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-              {Array.from({ length: 6 }).map((_, i) => (
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="bg-surface border border-line-soft rounded p-4 h-[280px] animate-pulse"
+                  className="bg-surface border border-line-soft rounded p-4 h-[180px] animate-pulse"
                 />
               ))}
             </div>
@@ -340,14 +256,50 @@ export function Inmuebles() {
           )}
 
           {!isLoading && !error && resultados.length > 0 && (
-            <div className={gridClass}>
+            <div className="flex flex-col gap-3">
               {resultados.map((inm) => (
                 <InmuebleCard key={inm.id} inm={inm} />
               ))}
             </div>
           )}
-        </section>
+        </div>
       </div>
     </>
+  );
+}
+
+// ────────────────────────────────────────────────────────────
+// Fila de chips horizontal con scroll horizontal en móvil.
+// Los negativos -mx-4 permiten que en pantallas angostas la fila
+// se extienda hasta el borde y ofrezca affordance de scroll.
+// ────────────────────────────────────────────────────────────
+type ChipRowProps<T extends string> = {
+  label: string;
+  active: T | null;
+  onSelect: (value: T | null) => void;
+  options: Array<{ value: T; count: number }>;
+};
+
+function ChipRow<T extends string>({ label, active, onSelect, options }: ChipRowProps<T>) {
+  return (
+    <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
+      <span className="text-[10.5px] font-mono uppercase tracking-[0.1em] text-muted flex-none pr-1 min-w-[80px]">
+        {label}
+      </span>
+      <Chip on={active === null} onClick={() => onSelect(null)} className="flex-none">
+        Todas
+      </Chip>
+      {options.map((opt) => (
+        <Chip
+          key={opt.value}
+          on={active === opt.value}
+          onClick={() => onSelect(opt.value)}
+          className="flex-none"
+        >
+          <span>{opt.value}</span>
+          <span className="ml-1.5 font-mono text-[10px] opacity-60">{opt.count}</span>
+        </Chip>
+      ))}
+    </div>
   );
 }
