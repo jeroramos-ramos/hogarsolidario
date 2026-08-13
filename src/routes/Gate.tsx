@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Building2, Home, HandHeart, type LucideIcon } from 'lucide-react';
 import { Ticker } from '@/components/Ticker';
 import { Hero } from '@/components/Hero';
 import { StatsBanner } from '@/components/StatsBanner';
@@ -9,6 +10,7 @@ type RoleKey = 'inmobiliaria' | 'propietario' | 'afectado';
 type RoleCard = {
   num: string;
   key: RoleKey;
+  icon: LucideIcon;
   title: string;
   body: string;
   cta: string;
@@ -19,6 +21,7 @@ const ROLES: RoleCard[] = [
   {
     num: '01',
     key: 'inmobiliaria',
+    icon: Building2,
     title: 'Soy Inmobiliaria Solidaria',
     body: 'Cargue su inventario disponible, vea en tiempo real qué está pidiendo cada familia y contáctela directamente. Sin comisión para nosotros.',
     cta: 'Publicar inmueble →',
@@ -27,6 +30,7 @@ const ROLES: RoleCard[] = [
   {
     num: '02',
     key: 'propietario',
+    icon: Home,
     title: 'Soy Propietario Solidario',
     body: 'Tiene un apartamento, una casa o una habitación desocupada. La ofrece en arriendo justo o cedida sin costo mientras pasa la emergencia.',
     cta: 'Publicar mi inmueble →',
@@ -35,6 +39,7 @@ const ROLES: RoleCard[] = [
   {
     num: '03',
     key: 'afectado',
+    icon: HandHeart,
     title: 'Soy afectado por el terremoto',
     body: 'Busque entre los inmuebles disponibles o deje su solicitud: cuántos son, qué necesitan y hasta cuánto pueden pagar. Las inmobiliarias la verán.',
     cta: 'Buscar vivienda →',
@@ -61,30 +66,40 @@ export function Gate() {
         <StatsBanner />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[14px] mt-8">
-          {ROLES.map((r) => (
-            <button
-              key={r.key}
-              onClick={() => navigate(r.to)}
-              className={
-                'text-left bg-surface rounded p-[22px] cursor-pointer ' +
-                'flex flex-col gap-[9px] transition-transform transition-colors ' +
-                // Bordes explícitos por lado para evitar cualquier ambigüedad de shorthand/longhand.
-                'border-l border-r border-b border-t-[3px] ' +
-                'border-l-line border-r-line border-b-line border-t-line ' +
-                'hover:border-l-ink hover:border-r-ink hover:border-b-ink hover:border-t-signal ' +
-                'hover:-translate-y-[2px] ' +
-                'focus-visible:outline-2 focus-visible:outline-signal focus-visible:outline-offset-[3px] ' +
-                'text-inherit font-body'
-              }
-            >
-              <span className="font-mono text-[11px] text-muted tracking-[0.1em]">{r.num}</span>
-              <h3 className="text-[19px] font-semibold font-display">{r.title}</h3>
-              <p className="text-[13.5px] text-muted flex-1 m-0">{r.body}</p>
-              <span className="font-display font-semibold text-[13px] text-ink border-t border-line-soft pt-[11px]">
-                {r.cta}
-              </span>
-            </button>
-          ))}
+          {ROLES.map((r) => {
+            const Icon = r.icon;
+            return (
+              <button
+                key={r.key}
+                onClick={() => navigate(r.to)}
+                className={
+                  'group text-left bg-surface rounded p-[22px] cursor-pointer ' +
+                  'flex flex-col gap-[9px] transition-transform transition-colors ' +
+                  'border-l border-r border-b border-t-[3px] ' +
+                  'border-l-line border-r-line border-b-line border-t-line ' +
+                  'hover:border-l-ink hover:border-r-ink hover:border-b-ink hover:border-t-signal ' +
+                  'hover:-translate-y-[2px] ' +
+                  'focus-visible:outline-2 focus-visible:outline-signal focus-visible:outline-offset-[3px] ' +
+                  'text-inherit font-body'
+                }
+              >
+                <div className="flex items-center gap-3">
+                  <Icon
+                    size={32}
+                    strokeWidth={1.5}
+                    className="text-ink group-hover:text-signal transition-colors flex-none"
+                    aria-hidden="true"
+                  />
+                  <span className="font-mono text-[11px] text-muted tracking-[0.1em]">{r.num}</span>
+                </div>
+                <h3 className="text-[19px] font-semibold font-display mt-1">{r.title}</h3>
+                <p className="text-[13.5px] text-muted flex-1 m-0">{r.body}</p>
+                <span className="font-display font-semibold text-[13px] text-ink border-t border-line-soft pt-[11px]">
+                  {r.cta}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <p className="mt-[34px] text-[12.5px] text-muted max-w-[70ch] border-l-[3px] border-line pl-[14px]">
