@@ -14,10 +14,22 @@ Deno.serve(async (req) => {
 
   try {
     const ipHash = await hashIp(req);
-    const rl = await checkRateLimit(ipHash, 'publicar-inmueble', 5, 60);
+    // Cargar inventario es el caso de uso principal, no abuso. 40/h por IP
+    // (una oficina compartiendo IP puede ser 3-4 asesores × 10 avisos).
+    // Si una inmobiliaria necesita más, escribe a hola@hogarsolidario.co
+    // y les subimos la cuota puntualmente.
+    const MAX_PER_HOUR = 40;
+    const rl = await checkRateLimit(ipHash, 'publicar-inmueble', MAX_PER_HOUR, 60);
     if (!rl.ok) {
       return json(
-        { error: 'rate_limited', retry_after_seconds: rl.retryAfter },
+        {
+          error: 'rate_limited',
+          count: rl.count,
+          max: MAX_PER_HOUR,
+          retry_after_seconds: rl.retryAfter,
+          reset_at: rl.resetAt,
+          contact_email: 'hola@hogarsolidario.co',
+        },
         { status: 429, headers: { 'Retry-After': String(rl.retryAfter), ...corsHeaders } },
       );
     }

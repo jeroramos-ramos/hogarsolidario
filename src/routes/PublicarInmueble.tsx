@@ -49,6 +49,12 @@ export function PublicarInmueble() {
   const [uploadId] = useState(() => newUploadId());
   const [photos, setPhotos] = useState<PhotoState[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [rateLimit, setRateLimit] = useState<{
+    count: number;
+    max: number;
+    resetAt: string;
+    contact: string;
+  } | null>(null);
 
   // ── import de Domus ────────────────────────────────────────────────
   const [domusUrl, setDomusUrl] = useState('');
@@ -288,6 +294,7 @@ export function PublicarInmueble() {
     }
 
     setSubmitting(true);
+    setRateLimit(null);
     try {
       const resp = await publicarInmueble(parsed.data);
       if (resp.estado === 'en_revision' && resp.motivo_revision) {
@@ -297,9 +304,15 @@ export function PublicarInmueble() {
       }
       navigate(`/inmuebles/${resp.id}`);
     } catch (err) {
-      const e = err as Error & { status?: number };
+      const e = err as Error & { status?: number; body?: unknown };
       if (e.status === 429) {
-        toast('Demasiadas publicaciones desde tu red. Esperá una hora.', { tone: 'alert' });
+        const b = (e.body ?? {}) as Record<string, unknown>;
+        setRateLimit({
+          count: typeof b.count === 'number' ? b.count : 0,
+          max: typeof b.max === 'number' ? b.max : 40,
+          resetAt: typeof b.reset_at === 'string' ? b.reset_at : new Date(Date.now() + 3600_000).toISOString(),
+          contact: typeof b.contact_email === 'string' ? b.contact_email : 'hola@hogarsolidario.co',
+        });
       } else {
         toast(`Error: ${e.message}`, { tone: 'alert' });
       }
@@ -754,9 +767,41 @@ export function PublicarInmueble() {
             </label>
           )}
 
+          {rateLimit && (
+            <div
+              role="alert"
+              className="border-l-[3px] border-alert bg-alert-soft p-4 rounded-r text-[13.5px] text-ink-2 mb-4"
+            >
+              <p className="m-0 font-semibold text-alert">
+                Alcanzaste el límite de publicación desde esta red.
+              </p>
+              <p className="m-0 mt-2">
+                Ya cargaste <b>{rateLimit.count} inmuebles</b> en la última hora
+                (máximo {rateLimit.max} por IP). Podés seguir a partir de las{' '}
+                <b className="font-mono">
+                  {new Date(rateLimit.resetAt).toLocaleTimeString('es-CO', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </b>
+                .
+              </p>
+              <p className="m-0 mt-2">
+                Si necesitás cargar más inventario de una vez, escribinos a{' '}
+                <a
+                  href={`mailto:${rateLimit.contact}?subject=${encodeURIComponent('Ampliar cuota de publicación')}`}
+                  className="text-ink font-semibold underline"
+                >
+                  {rateLimit.contact}
+                </a>{' '}
+                y te ampliamos la cuota para tu red.
+              </p>
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || rateLimit !== null}
             className="w-full font-display font-semibold text-[14px] px-4 py-3 rounded bg-ink text-white border border-ink hover:bg-ink-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? 'Publicando…' : 'Publicar inmueble'}

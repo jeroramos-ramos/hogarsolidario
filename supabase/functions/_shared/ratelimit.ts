@@ -1,27 +1,44 @@
 import { serviceClient } from './supabase.ts';
 
-// Verifica si hay más de `max` eventos para `ip_hash+endpoint` en las últimas `windowMinutes`.
-// Devuelve { ok: true } si se puede continuar, o { ok: false, retryAfter } si excede.
+// Ventana móvil por (ip_hash, endpoint). Devuelve el conteo actual dentro de la
+// ventana y el momento exacto de liberación (cuando el registro más viejo salga
+// de la ventana) para que la UI pueda mostrar "podés seguir a las 18:45" en vez
+// de un genérico "esperá una hora".
 export async function checkRateLimit(
   ipHash: string,
   endpoint: string,
   max: number,
   windowMinutes: number,
-): Promise<{ ok: true } | { ok: false; retryAfter: number }> {
+): Promise<
+  | { ok: true; count: number }
+  | { ok: false; count: number; retryAfter: number; resetAt: string }
+> {
   const sb = serviceClient();
-  const since = new Date(Date.now() - windowMinutes * 60_000).toISOString();
+  const windowMs = windowMinutes * 60_000;
+  const since = new Date(Date.now() - windowMs).toISOString();
 
-  const { count, error: countErr } = await sb
+  const { data, error } = await sb
     .from('rate_limits')
-    .select('*', { count: 'exact', head: true })
+    .select('ts')
     .eq('ip_hash', ipHash)
     .eq('endpoint', endpoint)
-    .gte('ts', since);
+    .gte('ts', since)
+    .order('ts', { ascending: true })
+    .limit(max + 1);
+  if (error) throw error;
 
-  if (countErr) throw countErr;
+  const count = data?.length ?? 0;
 
-  if ((count ?? 0) >= max) {
-    return { ok: false, retryAfter: windowMinutes * 60 };
+  if (count >= max) {
+    const earliestTs = data![0]!.ts as string;
+    const resetAtMs = new Date(earliestTs).getTime() + windowMs;
+    const retryAfter = Math.max(1, Math.ceil((resetAtMs - Date.now()) / 1000));
+    return {
+      ok: false,
+      count,
+      retryAfter,
+      resetAt: new Date(resetAtMs).toISOString(),
+    };
   }
 
   const { error: insErr } = await sb
@@ -29,5 +46,5 @@ export async function checkRateLimit(
     .insert({ ip_hash: ipHash, endpoint });
   if (insErr) throw insErr;
 
-  return { ok: true };
+  return { ok: true, count: count + 1 };
 }
