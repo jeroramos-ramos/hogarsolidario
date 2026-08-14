@@ -74,7 +74,7 @@ export function Gate() {
         <p className="text-base text-ink-2 max-w-[60ch]">
           Conectamos a las familias que quedaron sin vivienda por el terremoto con inmobiliarias
           y propietarios del Valle, el Eje Cafetero y el Chocó que están abriendo sus inmuebles.
-          Buscar es gratis y no pedimos documentos.
+          Buscar y publicar es gratis.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[14px] mt-8">
