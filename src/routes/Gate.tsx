@@ -158,35 +158,61 @@ export function Gate() {
           </section>
         )}
 
-        {/* ─── Solicitudes de familias — solo si hay ≥ 1 ─── */}
-        {solicitudesPreview.length > 0 && (
-          <section aria-labelledby="sol-heading" className="mt-14">
-            <div className="flex items-baseline justify-between gap-3 flex-wrap mb-5">
-              <h2
-                id="sol-heading"
-                className="text-[22px] sm:text-[26px] font-display font-bold leading-tight"
-              >
-                Familias buscando vivienda
+        {/* ─── Solicitudes de familias — siempre visible ─── */}
+        <section aria-labelledby="sol-heading" className="mt-14">
+          <div className="flex items-baseline justify-between gap-3 flex-wrap mb-5">
+            <h2
+              id="sol-heading"
+              className="text-[22px] sm:text-[26px] font-display font-bold leading-tight"
+            >
+              Familias buscando vivienda
+              {totalSolicitudes > 0 && (
                 <span className="ml-3 font-mono text-[14px] font-normal text-muted">
                   {totalSolicitudes} {totalSolicitudes === 1 ? 'solicitud' : 'solicitudes'}
                 </span>
-              </h2>
-              {totalSolicitudes > solicitudesPreview.length && (
-                <Link
-                  to="/familias"
-                  className="text-[13px] font-display font-semibold text-ink underline hover:no-underline no-underline whitespace-nowrap"
-                >
-                  Ver todas →
-                </Link>
               )}
-            </div>
+            </h2>
+            {totalSolicitudes > solicitudesPreview.length && (
+              <Link
+                to="/familias"
+                className="text-[13px] font-display font-semibold text-ink underline hover:no-underline no-underline whitespace-nowrap"
+              >
+                Ver todas →
+              </Link>
+            )}
+          </div>
+
+          {solicitudesPreview.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {solicitudesPreview.map((s) => (
                 <SolicitudPreviewCard key={s.id} s={s} />
               ))}
             </div>
-          </section>
-        )}
+          ) : (
+            // Bloque de invitación cuando no hay solicitudes todavía. Tono de
+            // invitación, no de disculpa: una inmobiliaria entiende que acá
+            // aparecerá demanda real, una familia entiende que puede dejar su
+            // caso aunque el catálogo no tenga nada para ella hoy.
+            <div className="border border-line rounded bg-surface p-5 sm:p-6 max-w-[720px]">
+              <p className="text-[15px] text-ink-2 leading-relaxed m-0">
+                Acá aparece la demanda real: familias que no encontraron algo en el
+                catálogo y dejaron dicho <b className="text-ink">qué necesitan</b> —
+                cuántos son, en qué municipio y hasta cuánto pueden pagar. Quienes
+                ofrecen inmuebles las contactan directamente.
+              </p>
+              <p className="text-[13.5px] text-muted mt-3 mb-4">
+                Si es tu caso, dejá tu solicitud. No pedimos documentos y tu nombre
+                completo y teléfono solo los ven quienes se contactan con vos.
+              </p>
+              <Link
+                to="/publicar/solicitud"
+                className="inline-block font-display font-semibold text-[14px] px-5 py-3 rounded bg-ink text-white border border-ink hover:bg-ink-2 no-underline"
+              >
+                Publicar mi solicitud →
+              </Link>
+            </div>
+          )}
+        </section>
 
         <p className="mt-[34px] text-[12.5px] text-muted max-w-[70ch] border-l-[3px] border-line pl-[14px]">
           <b className="text-ink">
