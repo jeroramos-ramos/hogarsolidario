@@ -269,7 +269,9 @@ export function PublicarInmueble() {
       banos: parseInt(banos || '0', 10),
       area_m2: area ? parseInt(area, 10) : undefined,
       disponible_desde: disponible,
-      duracion_minima: duracion,
+      // Duración fija en 12 meses para todo lo que se arrienda. Solo los inmuebles
+      // cedidos sin costo pueden tener una duración distinta.
+      duracion_minima: gratuito ? duracion : '12 meses',
       notas: notas.trim() || undefined,
       fotos: fotosPaths,
       flags: cleanFlags,
@@ -527,7 +529,7 @@ export function PublicarInmueble() {
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-              <div>
+              <div className={gratuito ? '' : 'md:col-span-2'}>
                 <label className={labelClass} htmlFor="canon">Canon mensual (COP)</label>
                 <input
                   id="canon"
@@ -541,15 +543,30 @@ export function PublicarInmueble() {
                   disabled={gratuito}
                 />
                 <div className="text-[11.5px] text-muted mt-1">
-                  Marcá "Sin costo" en Condiciones si lo cede.
+                  {gratuito
+                    ? 'Sin costo — el propietario cede el inmueble mientras dura la emergencia.'
+                    : 'Duración mínima del contrato: 12 meses. Marcá "Sin costo" en Condiciones si lo cede.'}
                 </div>
               </div>
-              <div>
-                <label className={labelClass} htmlFor="dur">Duración mínima</label>
-                <select id="dur" className={fieldClass} value={duracion} onChange={(e) => setDuracion(e.target.value)}>
-                  {DURACIONES.map((d) => (<option key={d}>{d}</option>))}
-                </select>
-              </div>
+              {/* Solo se muestra selector de duración cuando el inmueble es cedido sin
+                  costo: quien presta su casa gratis durante la emergencia no puede
+                  comprometerse a un año. Para arriendos con canon, la duración es fija
+                  en 12 meses (se fuerza al submit). */}
+              {gratuito && (
+                <div>
+                  <label className={labelClass} htmlFor="dur">Duración mínima</label>
+                  <select
+                    id="dur"
+                    className={fieldClass}
+                    value={duracion}
+                    onChange={(e) => setDuracion(e.target.value)}
+                  >
+                    {DURACIONES.map((d) => (
+                      <option key={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
               <div>
