@@ -12,7 +12,6 @@ import { PlaceholderPhoto } from './PlaceholderPhoto';
 export function InmueblePreviewCard({ inm }: { inm: InmueblePublico }) {
   const foto = inm.fotos[0];
   const necesitaRevisar = inm.estado_estructural === 'sin_revisar';
-  const propietarioSinVerificar = inm.publicado_por === 'propietario';
 
   return (
     <Link
@@ -54,12 +53,9 @@ export function InmueblePreviewCard({ inm }: { inm: InmueblePublico }) {
           )}
         </div>
 
-        {(necesitaRevisar || propietarioSinVerificar) && (
+        {necesitaRevisar && (
           <div className="flex flex-wrap gap-1 mt-1">
-            {necesitaRevisar && <Badge tone="warn">Sin revisar tras el sismo</Badge>}
-            {propietarioSinVerificar && (
-              <Badge tone="neutral">Publicante sin verificar</Badge>
-            )}
+            <Badge tone="warn">Sin revisar tras el sismo</Badge>
           </div>
         )}
       </div>

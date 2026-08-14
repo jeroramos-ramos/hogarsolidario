@@ -22,6 +22,7 @@ export type InmueblePublico = {
   flags: Partial<Record<FlagKey, boolean>>;
   estado_estructural: EstadoEstructural;
   created_at: string;
+  verificado_manual: boolean;
 };
 
 export type SolicitudPublica = {

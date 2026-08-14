@@ -14,7 +14,6 @@ import { PlaceholderPhoto } from './PlaceholderPhoto';
 
 export function InmuebleCard({ inm }: { inm: InmueblePublico }) {
   const necesitaRevisar = inm.estado_estructural === 'sin_revisar';
-  const propietarioSinVerificar = inm.publicado_por === 'propietario';
   const foto = inm.fotos[0];
 
   const metaTags = [inm.tipo, inm.municipio, inm.zona].filter(
@@ -80,14 +79,14 @@ export function InmuebleCard({ inm }: { inm: InmueblePublico }) {
             <p className="text-[13px] text-muted line-clamp-1 m-0">{inm.notas}</p>
           ) : null}
 
-          {/* Solo se muestran señales de seguridad — sellos positivos están ocultos
-              en la vista pública hasta que el inventario tenga suficiente masa. */}
-          {(necesitaRevisar || propietarioSinVerificar) && (
+          {/* Sellos positivos ocultos. Solo mostramos la advertencia de seguridad
+              cuando el estructural es "sin revisar" — información que la familia
+              necesita saber. El disclosure "publicado por particular" vive en la
+              ficha, no acá — en la fila el nombre + "Propietario solidario" del
+              pie ya diferencia al publicante. */}
+          {necesitaRevisar && (
             <div className="flex flex-wrap gap-1">
-              {necesitaRevisar && <Badge tone="warn">Sin revisar tras el sismo</Badge>}
-              {propietarioSinVerificar && (
-                <Badge tone="neutral">Publicante sin verificar</Badge>
-              )}
+              <Badge tone="warn">Sin revisar tras el sismo</Badge>
             </div>
           )}
 

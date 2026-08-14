@@ -24,6 +24,7 @@ function make(over: Partial<InmueblePublico> = {}): InmueblePublico {
     flags: {},
     estado_estructural: 'revisado_ingenieria',
     created_at: '2026-08-13T10:00:00Z',
+    verificado_manual: false,
     ...over,
   };
 }

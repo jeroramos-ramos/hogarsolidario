@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AppHeader } from '@/components/AppHeader';
 import { Ticker } from '@/components/Ticker';
-import { Badge } from '@/components/Badge';
 import { ReportDialog } from '@/components/ReportDialog';
 import { useInmueble } from '@/hooks/useInmuebles';
 import { cop, shortId } from '@/lib/format';
@@ -63,7 +62,6 @@ export function InmuebleDetalle() {
   }
 
   const necesitaRevisar = inm.estado_estructural === 'sin_revisar';
-  const propietarioSinVerificar = inm.publicado_por === 'propietario';
 
   const wa = `https://wa.me/57${inm.telefono}?text=${encodeURIComponent(
     `Hola, escribo por el inmueble ${shortId(inm.id)} de hogarsolidario.co (${inm.tipo} en ${inm.barrio}, ${inm.municipio}). ¿Sigue disponible?`,
@@ -174,19 +172,26 @@ export function InmuebleDetalle() {
               <div className="text-[11px] text-muted uppercase tracking-[0.08em] font-mono">
                 Publica
               </div>
-              <div className="mt-1">
-                <span className="text-verify font-bold">✓</span> {inm.quien_nombre}
-              </div>
+              <div className="mt-1 font-semibold">{inm.quien_nombre}</div>
               <div className="text-[12px] text-muted mt-1">
                 {inm.publicado_por === 'inmobiliaria'
                   ? 'Inmobiliaria solidaria'
                   : 'Propietario solidario'}
               </div>
-              {propietarioSinVerificar && (
-                <div className="mt-2">
-                  <Badge tone="neutral">Publicante sin verificar</Badge>
-                </div>
-              )}
+              {/* Solo aplica a propietarios (personas naturales). Las inmobiliarias
+                  no llevan esta línea. */}
+              {inm.publicado_por === 'propietario' &&
+                (inm.verificado_manual ? (
+                  <div className="mt-2 text-[12px] text-verify-ink flex items-start gap-[6px]">
+                    <span aria-hidden="true">✓</span>
+                    <span>Contacto verificado por Hogar Solidario</span>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-[11.5px] text-muted leading-snug m-0">
+                    Publicado por un particular. Verifique el inmueble en persona antes de
+                    comprometerse.
+                  </p>
+                ))}
             </div>
 
             <a
