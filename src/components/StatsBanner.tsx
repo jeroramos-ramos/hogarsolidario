@@ -26,12 +26,11 @@ export function StatsBanner() {
 
   const stats: Array<{ n: number; label: string }> = [
     { n: data.total, label: 'Inmuebles disponibles' },
-    { n: data.sin_fiador, label: 'Sin fiador' },
     { n: data.municipios, label: 'Municipios con oferta' },
   ];
 
   return (
-    <div className="border border-line rounded bg-surface mt-8 divide-y sm:divide-y-0 sm:divide-x divide-line-soft grid grid-cols-1 sm:grid-cols-3">
+    <div className="border border-line rounded bg-surface mt-8 divide-y sm:divide-y-0 sm:divide-x divide-line-soft grid grid-cols-1 sm:grid-cols-2">
       {stats.map((s) => (
         <div key={s.label} className="px-4 sm:px-5 py-4">
           <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted">

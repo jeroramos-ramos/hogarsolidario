@@ -26,7 +26,7 @@ function frecuencias<T extends string>(items: readonly (T | null | undefined)[])
 }
 
 function toneOfBarrier(k: FlagKey): boolean {
-  return k === 'sinFiador' || k === 'sinDeposito' || k === 'subsidio' || k === 'gratuito';
+  return k === 'sinDeposito' || k === 'gratuito';
 }
 
 export function Inmuebles() {

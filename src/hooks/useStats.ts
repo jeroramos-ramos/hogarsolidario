@@ -3,7 +3,6 @@ import { supabase } from '@/lib/supabase';
 
 export type Stats = {
   total: number;
-  sin_fiador: number;
   municipios: number;
 };
 

@@ -6,9 +6,9 @@ import { Badge } from './Badge';
 import { PlaceholderPhoto } from './PlaceholderPhoto';
 
 // Tarjeta con foto destacada 4:3 arriba, para el catálogo en la puerta.
-// No muestra sellos positivos (sin fiador, subsidio, etc.) — decisión de
-// producto para no prometer cosas sin verificar. Sí muestra advertencias
-// de seguridad y disclosures (sin revisar tras el sismo, sin verificar).
+// No muestra sellos positivos (amoblado, mascotas, etc.) — decisión de
+// producto para no prometer cosas sin verificar. Sí muestra la advertencia
+// de seguridad "sin revisar tras el sismo".
 export function InmueblePreviewCard({ inm }: { inm: InmueblePublico }) {
   const foto = inm.fotos[0];
   const necesitaRevisar = inm.estado_estructural === 'sin_revisar';

@@ -61,11 +61,11 @@ describe('cumpleFiltros', () => {
   });
 
   it('todas las flags marcadas deben cumplirse (AND)', () => {
-    const f: FiltrosInmuebles = { ...FILTROS_INICIALES, flags: new Set(['sinFiador', 'subsidio']) };
-    expect(cumpleFiltros(make({ flags: { sinFiador: true } }), f)).toBe(false);
-    expect(cumpleFiltros(make({ flags: { sinFiador: true, subsidio: true } }), f)).toBe(true);
+    const f: FiltrosInmuebles = { ...FILTROS_INICIALES, flags: new Set(['sinDeposito', 'mascotas']) };
+    expect(cumpleFiltros(make({ flags: { sinDeposito: true } }), f)).toBe(false);
+    expect(cumpleFiltros(make({ flags: { sinDeposito: true, mascotas: true } }), f)).toBe(true);
     expect(
-      cumpleFiltros(make({ flags: { sinFiador: true, subsidio: true, mascotas: true } }), f),
+      cumpleFiltros(make({ flags: { sinDeposito: true, mascotas: true, amoblado: true } }), f),
     ).toBe(true);
   });
 });

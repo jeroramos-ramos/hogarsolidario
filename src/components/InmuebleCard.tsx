@@ -6,11 +6,10 @@ import { logContactoInmueble } from '@/lib/api';
 import { Badge } from './Badge';
 import { PlaceholderPhoto } from './PlaceholderPhoto';
 
-// Los sellos positivos (sin fiador, subsidio, amoblado, revisado, etc.) no se
-// muestran en la vista pública mientras el inventario está en formación.
-// Se mantienen guardados en la base para poder reactivarlos sin editar avisos.
-// Excepciones que sí quedan: la advertencia "sin revisar tras el sismo" y el
-// disclosure "publicante sin verificar" — información de seguridad, no sellos.
+// Los sellos positivos (amoblado, mascotas, revisado, etc.) no se muestran en
+// la vista pública mientras el inventario está en formación. Se guardan en la
+// base para reactivarlos sin editar avisos. Excepción que sí queda: la
+// advertencia "sin revisar tras el sismo" — información de seguridad.
 
 export function InmuebleCard({ inm }: { inm: InmueblePublico }) {
   const necesitaRevisar = inm.estado_estructural === 'sin_revisar';

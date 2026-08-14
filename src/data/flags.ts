@@ -1,7 +1,19 @@
+// Condiciones que aparecen en el formulario del inmueble.
+//
+// Historia de decisiones:
+// - "sin fiador" / "sin deudor solidario" se eliminó: el deudor solidario lo
+//   exige la aseguradora del contrato, no lo decide la inmobiliaria.
+//   Ofrecerlo como condición era publicidad engañosa.
+// - "acepta subsidio de arriendo" se eliminó: el subsidio lo tramita la
+//   familia ante su alcaldía y la UNGRD. La inmobiliaria no acepta ni
+//   rechaza — cuenta como parte de la capacidad de pago de la familia.
+//   Se sustituye por una nota informativa en el formulario y la ficha.
 export const FLAGS = [
-  { k: 'sinFiador', l: 'Sin fiador ni codeudor', h: 'No exige finca raíz ni aseguradora' },
-  { k: 'sinDeposito', l: 'Sin depósito inicial', h: 'No cobra mes adelantado' },
-  { k: 'subsidio', l: 'Acepta subsidio de arriendo', h: 'Recibe el pago del programa estatal' },
+  {
+    k: 'sinDeposito',
+    l: 'No cobra canon anticipado',
+    h: 'No exige un mes por adelantado además del primero',
+  },
   { k: 'inmediata', l: 'Entrega inmediata', h: 'Se puede ocupar hoy' },
   { k: 'gratuito', l: 'Sin costo (cedido)', h: 'Sin canon mientras dura la emergencia' },
   { k: 'amoblado', l: 'Amoblado', h: 'Camas y enseres básicos' },
@@ -12,8 +24,6 @@ export const FLAGS = [
 export type FlagKey = (typeof FLAGS)[number]['k'];
 
 export const NEEDS = [
-  { k: 'sinFiador', l: 'No tengo fiador' },
-  { k: 'subsidio', l: 'Voy a pagar con el subsidio' },
   { k: 'amoblado', l: 'Lo necesito amoblado' },
   { k: 'mascotas', l: 'Tengo mascota' },
   { k: 'accesible', l: 'Necesito acceso sin escaleras' },
@@ -46,20 +56,13 @@ export type EstadoEstructural = (typeof ESTADOS_ESTRUCTURALES)[number]['k'];
 // Orden y clasificación de badges para las tarjetas.
 export const BADGE_ORDEN: readonly FlagKey[] = [
   'gratuito',
-  'sinFiador',
   'sinDeposito',
-  'subsidio',
   'inmediata',
   'amoblado',
   'mascotas',
   'accesible',
 ];
 
-export const BADGE_KEY_SET: ReadonlySet<FlagKey> = new Set([
-  'gratuito',
-  'sinFiador',
-  'sinDeposito',
-  'subsidio',
-]);
+export const BADGE_KEY_SET: ReadonlySet<FlagKey> = new Set(['gratuito', 'sinDeposito']);
 
 export const BADGE_OK_SET: ReadonlySet<FlagKey> = new Set(['inmediata']);

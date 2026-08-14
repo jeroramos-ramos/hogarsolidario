@@ -633,7 +633,7 @@ export function PublicarInmueble() {
           <fieldset className="border border-line rounded p-[18px] mb-4 bg-surface">
             <legend className="font-display font-semibold text-[12.5px] px-2 uppercase tracking-[0.07em]">
               Condiciones
-              {importedFrom && !flags.sinFiador && !flags.sinDeposito && !flags.subsidio && !flags.inmediata && (
+              {importedFrom && !flags.sinDeposito && !flags.inmediata && (
                 <span className="ml-2 font-mono text-[10px] text-signal-ink bg-signal-soft border border-signal-line px-1.5 py-0.5 rounded">
                   REVISÁ
                 </span>
@@ -641,10 +641,16 @@ export function PublicarInmueble() {
             </legend>
             {importedFrom && (
               <p className="text-[12.5px] text-signal-ink mb-3">
-                Domus no informa acepta subsidio, exige fiador o depósito ni disponibilidad
-                inmediata. Marcá las que apliquen — la familia decide con esta información.
+                Domus no informa disponibilidad inmediata, si acepta mascotas ni si cobra canon
+                anticipado. Marcá lo que aplique.
               </p>
             )}
+            <p className="text-[12.5px] text-muted mb-3 border-l-[3px] border-line pl-3">
+              <b className="text-ink">Sobre el subsidio de arriendo.</b> No es una condición
+              del inmueble — lo tramita la familia ante la alcaldía y la UNGRD, se lo giran
+              a ella y cuenta como parte de su capacidad de pago. Por eso no aparece como
+              casilla acá.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[9px]">
               {FLAGS.map((f) => (
                 <label

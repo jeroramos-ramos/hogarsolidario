@@ -6,9 +6,7 @@ const ESTADO_ESTRUCTURAL = ['revisado_ingenieria', 'sin_danos_aparentes', 'sin_r
 
 const flagsSchema = z
   .object({
-    sinFiador: z.boolean().optional(),
     sinDeposito: z.boolean().optional(),
-    subsidio: z.boolean().optional(),
     inmediata: z.boolean().optional(),
     gratuito: z.boolean().optional(),
     amoblado: z.boolean().optional(),
@@ -58,8 +56,6 @@ export const solicitudInputSchema = z.object({
   nota: z.string().max(500).optional(),
   necesidades: z
     .object({
-      sinFiador: z.boolean().optional(),
-      subsidio: z.boolean().optional(),
       amoblado: z.boolean().optional(),
       mascotas: z.boolean().optional(),
       accesible: z.boolean().optional(),

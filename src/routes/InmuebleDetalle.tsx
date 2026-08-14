@@ -141,7 +141,7 @@ export function InmuebleDetalle() {
               <p className="mt-5 text-[14px] text-ink-2 leading-relaxed">{inm.notas}</p>
             )}
 
-            {/* Sellos positivos (sin fiador, subsidio, amoblado, etc.) ocultos por
+            {/* Sellos positivos (amoblado, mascotas, accesible, etc.) ocultos por
                 decisión de producto — se siguen guardando en la base para reactivarlos
                 sin editar avisos. */}
           </div>
@@ -153,6 +153,11 @@ export function InmuebleDetalle() {
                 <small className="text-[12px] font-normal text-muted"> / mes</small>
               )}
             </div>
+
+            <p className="mt-3 text-[11.5px] text-muted leading-snug">
+              Si va a pagar con subsidio de arriendo, tramítelo en su alcaldía y la UNGRD —
+              se lo giran a usted y cuenta como capacidad de pago para el canon.
+            </p>
 
             <div className="flex gap-[14px] flex-wrap text-[13px] text-ink-2 border-t border-b border-line-soft py-3 mt-4">
               <span>

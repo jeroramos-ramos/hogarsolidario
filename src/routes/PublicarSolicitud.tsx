@@ -218,6 +218,12 @@ export function PublicarSolicitud() {
                 <input id="sHab" type="number" min={1} max={20} className={fieldClass} value={habitacionesMin} onChange={(e) => setHabitacionesMin(e.target.value)} />
               </div>
             </div>
+            <p className="text-[12.5px] text-muted mb-3 border-l-[3px] border-line pl-3">
+              <b className="text-ink">Si vas a usar el subsidio de arriendo</b>, sumalo a lo
+              que ponés acá. El subsidio lo tramitás vos ante la alcaldía de tu municipio y
+              la UNGRD — cuando te lo giren, es parte de tu capacidad de pago mensual. Las
+              inmobiliarias no lo "aceptan" ni lo "rechazan": simplemente cobran el canon.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
               <div>
                 <label className={labelClass} htmlFor="sTope">Hasta cuánto podés pagar</label>
