@@ -176,9 +176,11 @@ export function PublicarInmueble() {
       populateFromDomus(resp);
       toast('Ficha importada. Revisá y completá lo pendiente.');
     } catch (err) {
-      const e = err as Error & { status?: number };
+      const e = err as Error & { status?: number; body?: unknown };
       if (e.status === 429) {
-        setImportError('Demasiadas imports desde tu red. Esperá una hora.');
+        // Import y publish comparten bucket 'inventario': dispara el mismo
+        // bloque persistente que usa el submit, con detalles del backend.
+        setRateLimitFromBody(e.body);
       } else {
         setImportError(`Error: ${e.message}`);
         setShowFallback(true);
@@ -186,6 +188,21 @@ export function PublicarInmueble() {
     } finally {
       setImporting(false);
     }
+  }
+
+  function setRateLimitFromBody(body: unknown): void {
+    const b = (body ?? {}) as Record<string, unknown>;
+    setRateLimit({
+      count: typeof b.count === 'number' ? b.count : 0,
+      max: typeof b.max === 'number' ? b.max : 100,
+      resetAt:
+        typeof b.reset_at === 'string'
+          ? b.reset_at
+          : new Date(Date.now() + 3600_000).toISOString(),
+      contact: typeof b.contact_email === 'string' ? b.contact_email : 'hola@hogarsolidario.co',
+    });
+    // Aseguramos que el usuario vea el bloque aunque estuviera navegando abajo.
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
   }
 
   function toggleFlag(k: FlagKey, checked: boolean) {
@@ -306,13 +323,7 @@ export function PublicarInmueble() {
     } catch (err) {
       const e = err as Error & { status?: number; body?: unknown };
       if (e.status === 429) {
-        const b = (e.body ?? {}) as Record<string, unknown>;
-        setRateLimit({
-          count: typeof b.count === 'number' ? b.count : 0,
-          max: typeof b.max === 'number' ? b.max : 40,
-          resetAt: typeof b.reset_at === 'string' ? b.reset_at : new Date(Date.now() + 3600_000).toISOString(),
-          contact: typeof b.contact_email === 'string' ? b.contact_email : 'hola@hogarsolidario.co',
-        });
+        setRateLimitFromBody(e.body);
       } else {
         toast(`Error: ${e.message}`, { tone: 'alert' });
       }
@@ -331,6 +342,39 @@ export function PublicarInmueble() {
       <AppHeader />
 
       <div className="wrap max-w-[780px] py-6 pb-16">
+        {rateLimit && (
+          <div
+            role="alert"
+            className="border-l-[3px] border-alert bg-alert-soft p-4 rounded-r text-[13.5px] text-ink-2 mb-6"
+          >
+            <p className="m-0 font-semibold text-alert">
+              Alcanzaste el límite de carga de inventario desde esta red.
+            </p>
+            <p className="m-0 mt-2">
+              Ya realizaste <b>{rateLimit.count} cargas</b> en la última hora — publicar avisos
+              e importar desde Domus comparten cupo (máximo {rateLimit.max} por IP). Podés
+              seguir a partir de las{' '}
+              <b className="font-mono">
+                {new Date(rateLimit.resetAt).toLocaleTimeString('es-CO', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </b>
+              .
+            </p>
+            <p className="m-0 mt-2">
+              Si necesitás cargar más inventario ahora, escribinos a{' '}
+              <a
+                href={`mailto:${rateLimit.contact}?subject=${encodeURIComponent('Ampliar cuota de carga de inventario')}`}
+                className="text-ink font-semibold underline"
+              >
+                {rateLimit.contact}
+              </a>{' '}
+              y te ampliamos la cuota para tu red.
+            </p>
+          </div>
+        )}
+
         {esInmo && (
           <div className="border-l-[3px] border-line bg-surface p-[13px] pl-4 rounded-r text-[13px] mb-4">
             Por ahora la carga es de un inmueble a la vez. El panel para gestionar inventario
@@ -765,38 +809,6 @@ export function PublicarInmueble() {
                 importados de Domus y son mi responsabilidad revisarlos.
               </span>
             </label>
-          )}
-
-          {rateLimit && (
-            <div
-              role="alert"
-              className="border-l-[3px] border-alert bg-alert-soft p-4 rounded-r text-[13.5px] text-ink-2 mb-4"
-            >
-              <p className="m-0 font-semibold text-alert">
-                Alcanzaste el límite de publicación desde esta red.
-              </p>
-              <p className="m-0 mt-2">
-                Ya cargaste <b>{rateLimit.count} inmuebles</b> en la última hora
-                (máximo {rateLimit.max} por IP). Podés seguir a partir de las{' '}
-                <b className="font-mono">
-                  {new Date(rateLimit.resetAt).toLocaleTimeString('es-CO', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </b>
-                .
-              </p>
-              <p className="m-0 mt-2">
-                Si necesitás cargar más inventario de una vez, escribinos a{' '}
-                <a
-                  href={`mailto:${rateLimit.contact}?subject=${encodeURIComponent('Ampliar cuota de publicación')}`}
-                  className="text-ink font-semibold underline"
-                >
-                  {rateLimit.contact}
-                </a>{' '}
-                y te ampliamos la cuota para tu red.
-              </p>
-            </div>
           )}
 
           <button

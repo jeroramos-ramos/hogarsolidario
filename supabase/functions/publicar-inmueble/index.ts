@@ -14,12 +14,12 @@ Deno.serve(async (req) => {
 
   try {
     const ipHash = await hashIp(req);
-    // Cargar inventario es el caso de uso principal, no abuso. 40/h por IP
-    // (una oficina compartiendo IP puede ser 3-4 asesores × 10 avisos).
-    // Si una inmobiliaria necesita más, escribe a hola@hogarsolidario.co
-    // y les subimos la cuota puntualmente.
-    const MAX_PER_HOUR = 40;
-    const rl = await checkRateLimit(ipHash, 'publicar-inmueble', MAX_PER_HOUR, 60);
+    // Bucket compartido con import-domus bajo el mismo endpoint 'inventario':
+    // cargar avisos (manual o importado) es el caso de uso principal. Un solo
+    // contador de 100/h evita frenar por dos vías distintas. Si una inmobiliaria
+    // necesita más, escribe a hola@hogarsolidario.co y les subimos la cuota.
+    const MAX_PER_HOUR = 100;
+    const rl = await checkRateLimit(ipHash, 'inventario', MAX_PER_HOUR, 60);
     if (!rl.ok) {
       return json(
         {

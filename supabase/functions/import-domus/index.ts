@@ -22,10 +22,20 @@ Deno.serve(async (req) => {
 
   try {
     const ipHash = await hashIp(req);
-    const rl = await checkRateLimit(ipHash, 'import-domus', 10, 60);
+    // Bucket compartido con publicar-inmueble ('inventario', 100/h). Importar
+    // desde Domus es la variante automatizada de cargar inventario.
+    const MAX_PER_HOUR = 100;
+    const rl = await checkRateLimit(ipHash, 'inventario', MAX_PER_HOUR, 60);
     if (!rl.ok) {
       return json(
-        { error: 'rate_limited', retry_after_seconds: rl.retryAfter },
+        {
+          error: 'rate_limited',
+          count: rl.count,
+          max: MAX_PER_HOUR,
+          retry_after_seconds: rl.retryAfter,
+          reset_at: rl.resetAt,
+          contact_email: 'hola@hogarsolidario.co',
+        },
         { status: 429, headers: { 'Retry-After': String(rl.retryAfter), ...corsHeaders } },
       );
     }
