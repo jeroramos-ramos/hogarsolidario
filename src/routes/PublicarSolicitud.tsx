@@ -127,7 +127,8 @@ export function PublicarSolicitud() {
                   required
                 />
                 <div className="text-[11.5px] text-muted mt-1">
-                  Solo lo verán quienes ofrecen vivienda y estén verificados.
+                  Aparece en tu solicitud para que te escriban directamente por WhatsApp
+                  quienes tengan un inmueble para vos.
                 </div>
               </div>
             </div>

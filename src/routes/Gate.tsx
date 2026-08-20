@@ -201,8 +201,9 @@ export function Gate() {
                 ofrecen inmuebles las contactan directamente.
               </p>
               <p className="text-[13.5px] text-muted mt-3 mb-4">
-                Si es tu caso, dejá tu solicitud. No pedimos documentos y tu nombre
-                completo y teléfono solo los ven quienes se contactan con vos.
+                Si es tu caso, dejá tu solicitud. No pedimos documentos. Aparecés con
+                tu primer nombre y tu WhatsApp para que quienes ofrezcan vivienda te
+                escriban directamente.
               </p>
               <Link
                 to="/publicar/solicitud"

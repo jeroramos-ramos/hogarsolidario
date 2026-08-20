@@ -116,26 +116,24 @@ export type DomusImportFailure = {
 
 export type DomusImportResp = DomusImportSuccess | DomusImportFailure;
 
-// ── contact solicitud ──────────────────────────────────────────────
-// Devuelve wa_url si la request está autorizada, o un error tipado si no.
-// La edge function acepta:
-//   - sesión de asesor verificado (auth JWT), o
-//   - propietario_telefono que matchee un inmueble activo publicado.
-export type ContactSolicitudResp =
-  | { ok: true; wa_url: string; telefono: string }
-  | { ok: false; error: string; status: number };
-
-export async function contactarSolicitud(input: {
-  solicitud_id: string;
-  propietario_telefono?: string;
-}): Promise<ContactSolicitudResp> {
-  try {
-    const data = await invoke<{ wa_url: string; telefono: string }>('contact-solicitud', input);
-    return { ok: true, ...data };
-  } catch (err) {
-    const e = err as Error & { status?: number };
-    return { ok: false, error: e.message || 'internal', status: e.status ?? 500 };
-  }
+// Fire-and-forget: registra el clic de contacto sobre una solicitud. Simétrico
+// a logContactoInmueble. El teléfono ya está en la vista solicitudes_publicas,
+// así que el <a href="wa.me/..."> navega directo; este POST solo deja auditoría
+// en `contactos` para medir uso real.
+export function logContactoSolicitud(solicitudId: string): void {
+  const anon = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  fetch(`${SUPABASE_URL}/functions/v1/contact-solicitud`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${anon}`,
+      apikey: anon,
+    },
+    body: JSON.stringify({ solicitud_id: solicitudId }),
+    keepalive: true,
+  }).catch(() => {
+    // Silencioso: no bloqueamos el WhatsApp por un fallo de log.
+  });
 }
 
 export async function importarDomus(input: { url?: string; html?: string }): Promise<DomusImportResp> {

@@ -41,6 +41,7 @@ export type SolicitudPublica = {
   tope_canon: number;
   necesidades: Partial<Record<FlagKey, boolean>>;
   created_at: string;
+  telefono: string;
 };
 
 export type OrdenInmuebles = 'recientes' | 'baratos' | 'grandes';

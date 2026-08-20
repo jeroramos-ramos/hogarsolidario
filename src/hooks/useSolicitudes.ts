@@ -9,7 +9,7 @@ async function fetchSolicitudes(): Promise<SolicitudPublica[]> {
   const { data, error } = await supabase
     .from('solicitudes_publicas')
     .select(
-      'id, nombre_corto, adultos, ninos, adultos_mayores, situacion, en_censo, departamento, municipio, zona, tipo, habitaciones_min, tope_canon, necesidades, created_at',
+      'id, nombre_corto, adultos, ninos, adultos_mayores, situacion, en_censo, departamento, municipio, zona, tipo, habitaciones_min, tope_canon, necesidades, created_at, telefono',
     )
     .order('created_at', { ascending: false })
     .limit(500);

@@ -27,10 +27,10 @@ export function Familias() {
         </div>
 
         <div className="mt-4 border-l-[3px] border-verify bg-verify-soft text-verify-ink p-[13px] pl-4 rounded-r text-[13px] max-w-[70ch]">
-          <b>Aquí está la demanda real.</b> Cada tarjeta es una familia que ya dijo qué necesita
-          y cuánto puede pagar. El contacto se abre para inmobiliarias verificadas y para
-          propietarios que ya publicaron un inmueble en la plataforma — no exponemos nombre
-          completo, teléfono ni notas privadas en el listado.
+          <b>Aquí está la demanda real.</b> Cada tarjeta es una familia que ya dijo qué
+          necesita y cuánto puede pagar. Escribiles directamente por WhatsApp — cada
+          contacto queda registrado para medir uso. En el listado no aparece el apellido
+          ni las notas privadas que la familia haya escrito.
         </div>
 
         {error && (
